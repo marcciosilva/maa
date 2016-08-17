@@ -1,9 +1,17 @@
 import numpy
 import copy
 
+'''
+Este modulo es una utilidad para manejar tableros de damas y obtener
+tableros sucesores a partir de un tablero actual.
+Se asume que los tableros son cuadrados (el tablero estandar de damas
+es de 8 x 8).
+'''
+
 def printBoard(board):
     for i in range(len(board)):
         print board[i]
+    print "##################"
 
 #B for black
 #W for white
@@ -20,6 +28,18 @@ def printBoard(board):
 #     ["O", "B", "O", "B", "O", "B", "O", "B"],
 #     ["B", "O", "B", "O", "B", "O", "B", "O"]
 #     ]
+
+#juego corto
+board = [
+    ["O", "O", "O", "O", "O", "O", "O", "O"],
+    ["O", "O", "O", "O", "O", "O", "O", "O"],    
+    ["O", "O", "O", "O", "O", "O", "O", "O"],
+    ["O", "O", "O", "O", "O", "O", "O", "O"],
+    ["O", "O", "O", "W", "O", "O", "O", "O"],
+    ["O", "O", "B", "O", "O", "O", "O", "O"],
+    ["O", "O", "O", "O", "O", "O", "O", "O"],
+    ["O", "O", "O", "O", "O", "O", "O", "O"]
+    ]
 
 #tablero en donde las negras pueden comer una blanca
 # board = [
@@ -70,16 +90,58 @@ def printBoard(board):
 #     ]
 
 #white double
-board = [
-    ["O", "O", "O", "O", "O", "O", "O", "O"],
-    ["O", "O", "O", "O", "O", "O", "O", "O"],
-    ["O", "O", "O", "O", "O", "O", "O", "O"],
-    ["O", "O", "O", "O", "W", "O", "O", "O"],
-    ["O", "O", "O", "B", "O", "B", "O", "O"],
-    ["O", "O", "O", "O", "O", "O", "O", "O"],
-    ["O", "O", "O", "B", "O", "O", "O", "O"],
-    ["O", "O", "O", "O", "O", "O", "O", "O"]
-    ]
+# board = [
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "W", "O", "O", "O"],
+#     ["O", "O", "O", "B", "O", "B", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "B", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"]
+#     ]
+
+#devuelve True si la ficha es amenazada por el contrario
+#o sea que puede ser comida en el siguiente turno
+def fichaAmenazada(position, board, isBlack):
+    successors = getSuccessors(board, isBlack)
+    if (isBlack):
+        playerChecker = "B"
+    else:
+        playerChecker = "W"
+    for s in successors:
+        #si es comida en algun sucesor
+        if (s[position[0]][position[1]] != playerChecker):
+            return True
+    return False
+
+def cantFichasAmenazadas(board, isBlack):
+    cant = 0
+    boardLength = len(board)
+    if (isBlack):
+        playerChecker = "B"
+    else:
+        playerChecker = "W"        
+    for i in range(boardLength):
+        for j in range(boardLength):
+            if (board[i][j] == playerChecker and fichaAmenazada((i,j), board, isBlack)):
+                cant += 1
+    return cant
+                
+
+def cantFichasColor(board, isBlack):
+    cant = 0
+    boardLength = len(board)
+    if (isBlack):
+        playerChecker = "B"
+    else:
+        playerChecker = "W"    
+    #assuming square board
+    for i in range(boardLength):
+        for j in range(boardLength):
+            if (board[i][j] == playerChecker):
+                cant += 1
+    return cant
 
 def printNotLegal():
     print "Movement is not legal"
@@ -186,5 +248,3 @@ def main():
     for member in boardList:
         printBoard(member)
         print("####################################")
-
-main()
