@@ -1,0 +1,3 @@
+import generalizer
+
+generalizer.main()
