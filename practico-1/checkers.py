@@ -8,15 +8,77 @@ def printBoard(board):
 #B for black
 #W for white
 #O for empty
+
+#tablero inicial
+# board = [
+#     ["O", "W", "O", "W", "O", "W", "O", "W"],
+#     ["W", "O", "W", "O", "W", "O", "W", "O"],
+#     ["O", "W", "O", "W", "O", "W", "O", "W"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["B", "O", "B", "O", "B", "O", "B", "O"],
+#     ["O", "B", "O", "B", "O", "B", "O", "B"],
+#     ["B", "O", "B", "O", "B", "O", "B", "O"]
+#     ]
+
+#tablero en donde las negras pueden comer una blanca
+# board = [
+#     ["O", "W", "O", "W", "O", "W", "O", "W"],
+#     ["W", "O", "W", "O", "W", "O", "W", "O"],
+#     ["O", "W", "O", "O", "O", "O", "O", "W"],
+#     ["O", "O", "O", "O", "W", "O", "W", "O"],
+#     ["O", "B", "O", "B", "O", "O", "O", "O"],
+#     ["O", "O", "B", "O", "O", "O", "B", "O"],
+#     ["O", "B", "O", "B", "O", "B", "O", "B"],
+#     ["B", "O", "B", "O", "B", "O", "B", "O"]
+#     ]
+
+#comida simple
+# board = [
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "W", "O", "O", "O"],
+#     ["O", "O", "O", "B", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"]
+#     ]
+
+#comida doble
+# board = [
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "W", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "W", "O", "W", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "W", "O", "O", "O"],
+#     ["O", "O", "O", "B", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"]
+#     ]
+
+#white action
+# board = [
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "W", "O", "O", "O"],
+#     ["O", "O", "O", "B", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"],
+#     ["O", "O", "O", "O", "O", "O", "O", "O"]
+#     ]
+
+#white double
 board = [
-    ["O", "W", "O", "W", "O", "W", "O", "W"],
-    ["W", "O", "W", "O", "W", "O", "W", "O"],
-    ["O", "W", "O", "W", "O", "W", "O", "W"],
     ["O", "O", "O", "O", "O", "O", "O", "O"],
     ["O", "O", "O", "O", "O", "O", "O", "O"],
-    ["B", "O", "B", "O", "B", "O", "B", "O"],
-    ["O", "B", "O", "B", "O", "B", "O", "B"],
-    ["B", "O", "B", "O", "B", "O", "B", "O"]
+    ["O", "O", "O", "O", "O", "O", "O", "O"],
+    ["O", "O", "O", "O", "W", "O", "O", "O"],
+    ["O", "O", "O", "B", "O", "B", "O", "O"],
+    ["O", "O", "O", "O", "O", "O", "O", "O"],
+    ["O", "O", "O", "B", "O", "O", "O", "O"],
+    ["O", "O", "O", "O", "O", "O", "O", "O"]
     ]
 
 def printNotLegal():
@@ -36,60 +98,24 @@ def insertBoardInBoardList(board, boardList):
     if (not (board in boardList)):
         boardList.append(board)
 
-# def moveTo(initPos, endPos, board, black):
-#     if (checkLegalPosition(initPos, board) and checkLegalPosition(endPos, board)):
-#         horizontalDistance = abs(initPos[0] - endPos[0])
-#         verticalDistance = initPos[1] - endPos[1]
-#         endSymbol = board[endPos[0]][endPos[1]]
-#         initSymbol = board[initPos[0]][initPos[1]]
-#         if (black):
-#             #move to empty cell
-#             if (initSymbol == "B" and endSymbol == "O"):
-#                 #movement is in correct sense
-#                 if (horizontalDistance == 1 and verticalDistance == -1):
-#                     swapCellContents(initPos, endPos, board)
-#                     printMovement(initPos, endPos)
-#                 else:
-#                     printNotLegal()
-#             #move to occupied cell
-#             elif (initSymbol == "B" and endSymbol == "W"):
-#                 #check if checker can be conquered
-
-#                 if (checkLegalPosition())
-#             else:
-#                 printNotLegal()
-#         elif (not black):
-#             #move to empty cell
-#             if (initSymbol == "W" and endSymbol == "O"):
-#                 #movement is in correct sense
-#                 if (horizontalDistance == 1 and verticalDistance == 1):
-#                     #swap cell contents
-#                     swapCellContents(initPos, endPos, board)
-#                     printMovement(initPos, endPos)                    
-#                 else:
-#                     printNotLegal()
-#                         #move to occupied cell
-#             elif (initSymbol == "B" and endSymbol == "W"):
-#                 #check if checker can be conquered
-#                 if (checkLegalPosition())
-#             else:
-#                 printNotLegal()
-#     return board
-
 #returns list of possible outcome boards
-#empty if equal (?)
 def getSuccessors(board, isBlack):
     boardList = []
     boardLength = len(board)
+    if (isBlack):
+        opponentChecker, playerChecker = "W", "B"
+    else:
+        opponentChecker, playerChecker = "B", "W"
     #assuming square board
     for i in range(boardLength):
         for j in range(boardLength):
-            #if black checker
-            if (board[i][j] == "B"):
+            if (isBlack):
                 #top left
                 #i indica la fila en la matriz y j la columna
-                topLeft = (i-1, j-1)
-                topRight = (i-1, j+1)
+                topLeft, topRight = (i-1, j-1), (i-1, j+1)
+            else:
+                topLeft, topRight = (i+1, j+1), (i+1, j-1)
+            if (board[i][j] == playerChecker):
                 if (checkLegalPosition(topLeft, board)):
                     #empty cell
                     if (board[topLeft[0]][topLeft[1]] == "O"):
@@ -98,11 +124,8 @@ def getSuccessors(board, isBlack):
                         #make the move
                         swapCellContents((i,j), topLeft, newSuccessor)
                         insertBoardInBoardList(newSuccessor, boardList)
-                    # elif (board[topLeft[0]][topLeft[1]] == "W"):
-                    #     #check if next in line is empty
-                    #     pass
-                    # else:
-                    #     pass
+                    elif (board[topLeft[0]][topLeft[1]] == opponentChecker):
+                        boardList = boardList + jumpEnemyChecker((i,j), topLeft, opponentChecker, board)
                 #top right
                 if (checkLegalPosition(topRight, board)):
                     #empty cell
@@ -112,41 +135,56 @@ def getSuccessors(board, isBlack):
                         #make the move
                         swapCellContents((i,j), topRight, newSuccessor)
                         insertBoardInBoardList(newSuccessor, boardList)
-                    # elif (board[topRight[0]][topRight[1]] == "W"):
-                    #     #check if next in line is empty
-                    #     pass
+                    elif (board[topRight[0]][topRight[1]] == opponentChecker):
+                        boardList = boardList + jumpEnemyChecker((i,j), topRight, opponentChecker, board)
     return boardList
 
+#asume que la siguiente celda (para el lado que se ponga por parametro) es legal
+#y tiene una ficha contraria
+def jumpEnemyChecker(position, enemyCheckerPos, opponentChecker, board):
+    #position es la posicion de la ficha del jugador
+    #enemyCheckerPos la de la ficha enemiga
+    #vertical direction (rows)
+    vDir = enemyCheckerPos[0] - position[0]
+    #horizontal direction (columns)
+    hDir = enemyCheckerPos[1] - position[1]
+    boardList = []
+    #posicion siguiente a la ficha enemiga, en misma direccion
+    nextPos = (enemyCheckerPos[0] + vDir, enemyCheckerPos[1] + hDir)
+    #aca ya se que en la siguiente celda hay una ficha enemiga
+    #si la posicion siguiente a la ficha enemiga es legal y esta vacia
+    if (checkLegalPosition(nextPos, board) 
+        and board[nextPos[0]][nextPos[1]] == "O"):
+        newBoard = copy.deepcopy(board)
+        #muevo mi ficha comiendo a la otra
+        swapCellContents(position, nextPos, newBoard)
+        #vacio celda enemiga
+        newBoard[enemyCheckerPos[0]][enemyCheckerPos[1]] = "O"
+        #si es legal continuar moviendome hacia el lado contrario
+        if (checkLegalPosition((nextPos[0] + vDir, nextPos[1]), newBoard)):
+            #recursion para el lado que vino (le pongo left because fuck you)
+            leftPos = (nextPos[0] + vDir, nextPos[1] + hDir)
+            if (checkLegalPosition(leftPos, newBoard)
+                and newBoard[leftPos[0]][leftPos[1]] == opponentChecker):
+                boardList = boardList + jumpEnemyChecker(nextPos, leftPos, opponentChecker, newBoard)
+            #recursion para el otro
+            rightPos = (nextPos[0] + vDir, nextPos[1] - hDir)
+            if (checkLegalPosition(rightPos, newBoard)
+                and newBoard[rightPos[0]][rightPos[1]] == opponentChecker):
+                boardList = boardList + jumpEnemyChecker(nextPos, rightPos, opponentChecker, newBoard)
+        #si resulta que no pude encadenar saltos (solo pude comer una ficha contraria)
+        if (len(boardList) == 0):
+            insertBoardInBoardList(newBoard, boardList)
+    return boardList
 
-#(en un while capaz rinde, onda 
-#while checkLegalPosition(posicion siguiente en el sentido que se viene) 
-#and hayFichaContraria o algo asi)
-
-"""
-pseudocodigo para comer fichas
-me pasas una ficha y el tipo y yo intento comer
-
-para cada lado
-    si la posicion de desp de la siguiente ficha es legal y ademas esta vacia Y
-    si hay una ficha contraria para el lado que miro
-        hago los swaps y bla y dejo la ficha en el nuevo lugar
-    sino
-        agrego esa board a la boardList de resultado
-retorno la boardList de resultado (que perfectamente puede ser vacia)
-
-
-"""
-
-#deberia usar un set para las boards posibles, en caso de que alguna se repita
-
-
-print board == copy.deepcopy(board)
-
-
-printBoard(board)
-print "Getting successors for black player..."
-print("####################################")
-boardList = getSuccessors(board, True)
-for member in boardList:
-    printBoard(member)
+def main():
+    print "Initial board"
+    printBoard(board)
+    print "Getting successors for white player..."
     print("####################################")
+    boardList = getSuccessors(board, False)
+    for member in boardList:
+        printBoard(member)
+        print("####################################")
+
+main()
