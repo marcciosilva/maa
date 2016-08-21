@@ -1,0 +1,2 @@
+Ingrese w1: Ingrese w2: Ingrese w3: Ingrese w4: Ingrese la cantidad de partidas: w0 = 1.0, w1 = 1.4517126718, w2 = -10.776683596, w3 = -0.348061924788, w4 = -0.285305185964
+won = 198, lost = 1, tie = 1

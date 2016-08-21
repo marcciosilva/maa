@@ -11,7 +11,10 @@ w2 = 1.0
 w3 = 1.0
 w4 = 1.0
 moderador = 0.0
-playerIsBlack = True
+randomBotIsBlack = True
+won = 0
+lost = 0
+tie = 0
 
 # booleano que indica si en el retorno se toma en cuenta o no
 # la diferencia de fichas en el tablero final
@@ -23,11 +26,38 @@ def v(fichas_player, fichas_opponent, amenaza_player, amenaza_opponent):
 	value = w0 + w1 * fichas_player + w2 * fichas_opponent + w3 * amenaza_player + w4 * amenaza_opponent
 	return value
 
+def printWeights():
+	print "w0 = {}, w1 = {}, w2 = {}, w3 = {}, w4 = {}".format(w0, w1, w2, w3, w4)
+
 # generacion de ejemplos de entrenamiento
 def main():
-	# se obtiene un tablero inicial
-	newBoard = getNewBoard()
-	playGame(newBoard)
+	global w1, w2, w3, w4, won, lost, tie
+	w1 = float(raw_input("Ingrese w1: "))
+	w2 = float(raw_input("Ingrese w2: "))
+	w3 = float(raw_input("Ingrese w3: "))
+	w4 = float(raw_input("Ingrese w4: "))
+	cantPartidas = int(raw_input("Ingrese la cantidad de partidas: "))
+	for i in range(cantPartidas):
+		# se obtiene un tablero inicial
+		newBoard = getNewBoard()
+		newBoard = playGame(newBoard)
+		blackCheckerAmount = cantFichasColor(newBoard, True)
+		whiteCheckerAmount = cantFichasColor(newBoard, False)
+		if (blackCheckerAmount > whiteCheckerAmount):
+			if (randomBotIsBlack):
+				lost += 1
+			else:
+				won += 1
+		elif (blackCheckerAmount < whiteCheckerAmount):
+			if (randomBotIsBlack):
+				won += 1
+			else:
+				lost += 1
+		else:
+			tie += 1
+	printWeights()
+	print "won = {}, lost = {}, tie = {}".format(won, lost, tie)
+
 
 def printBoard(board):
     for i in range(len(board)):
@@ -185,26 +215,17 @@ def playGame(board):
 	blackCanMove = True
 	whiteCanMove = True
 	history.append(board)
-	printBoard(board)
+	# printBoard(board)
 	while True:
 		# mueve el jugador de fichas negras
-		if (playerIsBlack):
-			entrada = raw_input("Ingrese el indice 0 de la posicion inicial: ")
-			x = int(entrada)
-			entrada = raw_input("Ingrese el indice 1 de la posicion inicial: ")
-			y = int(entrada)
-			initPos = (x,y)
-			print initPos
-			entrada = raw_input("Ingrese el indice 0 de la posicion final: ")
-			x = int(entrada)
-			entrada = raw_input("Ingrese el indice 1 de la posicion final: ")
-			y = int(entrada)
-			endPos = (x,y)
-			print endPos
-			nextBoard = []
-			while (len(nextBoard) == 0):
-				nextBoard = playerMove(initPos, endPos, True, board)
-			print "fag"
+		if (randomBotIsBlack):
+			successors = getSuccessors(board, True)
+			succLength = len(successors)
+			if (succLength > 0):
+				pickRandom = int(math.floor(random.uniform(0, succLength)))
+				nextBoard = successors[pickRandom]
+			else:
+				nextBoard = []
 		else:
 			nextBoard = move(True, board)
 		if (whiteCanMove):
@@ -218,20 +239,14 @@ def playGame(board):
 			break
 		# mueve el jugador de fichas negras
 		if (blackCanMove):
-			if (not playerIsBlack):
-				entrada = raw_input("Ingrese el indice 0 de la posicion inicial: ")
-				x = int(entrada)
-				entrada = raw_input("Ingrese el indice 1 de la posicion inicial: ")
-				y = int(entrada)
-				initPos = (x,y)
-				entrada = raw_input("Ingrese el indice 0 de la posicion final: ")
-				x = int(entrada)
-				entrada = raw_input("Ingrese el indice 1 de la posicion final: ")
-				y = int(entrada)
-				endPos = (x,y)
-				nextBoard = []
-				while (len(nextBoard) == 0):
-					nextBoard = playerMove(initPos, endPos, False, board)
+			if (not randomBotIsBlack):
+				successors = getSuccessors(board, False)
+				succLength = len(successors)
+				if (succLength > 0):
+					pickRandom = int(math.floor(random.uniform(0, succLength)))
+					nextBoard = successors[pickRandom]
+				else:
+					nextBoard = []				
 			else:
 				nextBoard = move(False, board)
 			if (len(nextBoard) != 0):
@@ -242,47 +257,8 @@ def playGame(board):
 				whiteCanMove = False
 		else:# no hay mas movimientos para las fichas negras (gana white)
 			break
-		printBoard(board)
-
-def playerMove(initPos, endPos, isBlack, board):
-	#se asume que el player juega correctamente mayoritariamente
-	success = False
-	newBoard = []
-	while (True):
-		if (not checkLegalPosition(initPos, board)):
-			print "Posicion inicial ilegal, intente de nuevo"
-			break
-		elif (not checkLegalPosition(endPos, board)):
-			print "Posicion final ilegal, intente de nuevo"
-			break
-		else:
-			if (isBlack):
-				if (board[initPos[0]][initPos[1]] != "B"):
-					print "La primera celda no tiene una ficha tuya, intentalo de nuevo"
-					break
-				elif (board[endPos[0]][endPos[1]] == "B"):
-					print "La segunda celda tiene una ficha tuya, intentalo de nuevo"
-					break
-				else:
-					newBoard = copy.deepcopy(board)
-					swapCellContents(initPos, endPos, newBoard)
-					break
-			else:
-				if (board[initPos[0]][initPos[1]] != "W"):
-					print "La primera celda no tiene una ficha tuya, intentalo de nuevo"
-					break
-				elif (board[endPos[0]][endPos[1]] == "W"):
-					print "La segunda celda tiene una ficha tuya, intentalo de nuevo"				
-					break
-				else:
-					newBoard = copy.deepcopy(board)
-					swapCellContents(initPos, endPos, newBoard)
-					break
-	return newBoard
-
-
-
-
+		# printBoard(board)
+	return board
 
 def move(isBlack, board):
 	if (isBlack):
