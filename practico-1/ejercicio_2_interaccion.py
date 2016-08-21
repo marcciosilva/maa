@@ -11,14 +11,7 @@ w2 = 1.0
 w3 = 1.0
 w4 = 1.0
 moderador = 0.0
-
-# contadores de partidas ganadas, perdidas y empatadas
-won = 0
-lost = 0
-tied = 0
-
-# historial de pesos de funcion objetivo
-listaWeights = []
+playerIsBlack = True
 
 # booleano que indica si en el retorno se toma en cuenta o no
 # la diferencia de fichas en el tablero final
@@ -30,124 +23,11 @@ def v(fichas_player, fichas_opponent, amenaza_player, amenaza_opponent):
 	value = w0 + w1 * fichas_player + w2 * fichas_opponent + w3 * amenaza_player + w4 * amenaza_opponent
 	return value
 
-def lms(trainingExamples): #ajusta coeficientes
-	# el entrenamiento se hace solo desde el punto de vista del jugador
-	# de fichas negras
-	# aunque despues esa misma funcion se usa para simular los movimientos
-	# del jugador de fichas blancas
-	global w1, w2, w3, w4
-	for example in trainingExamples:
-		vtrain = example[1]
-		board = example[0]
-		x1 = cantFichasColor(board, True)
-		x2 = cantFichasColor(board, False)
-		x3 = cantFichasAmenazadas(board, True)
-		x4 = cantFichasAmenazadas(board, False)
-		vcurrent = v(x1, x2, x3, x4)
-		w1 += moderador * (vtrain - vcurrent) * x1
-		w2 += moderador * (vtrain - vcurrent) * x2
-		w3 += moderador * (vtrain - vcurrent) * x3
-		w4 += moderador * (vtrain - vcurrent) * x4
-
-def printWeights():
-	print "w0 = {}, w1 = {}, w2 = {}, w3 = {}, w4 = {}".format(w0, w1, w2, w3, w4)
-
-def main():
-	# inicializacion de pesos
-	randomrange = raw_input("Ingrese el valor absoluto de uno de los extremos del intervalo del cual se tomaran wi aleatorios: ")
-	global w1, w2, w3, w4, moderador, won, lost, tied
-	# se inicializan los pesos en base a la entrada del usuario
-	w1 = random.uniform(-float(randomrange), float(randomrange))
-	w2 = random.uniform(-float(randomrange), float(randomrange))
-	w3 = random.uniform(-float(randomrange), float(randomrange))
-	w4 = random.uniform(-float(randomrange), float(randomrange))
-	# se agrega el valor inicial de los pesos a una estructura
-	# encargada de mantener un historial de los mismos
-	listaWeights.append((w1, w2, w3, w4))
-	moderador = float(raw_input("Ingrese el valor del moderador (ej.: 0.001): "))
-	gameAmount = int(raw_input("Ingrese la cantidad de partidas a jugar: "))
-	for i in range(gameAmount):
-		# se generan ejemplos de entrenamiento
-		trainingExamples = generateTrainingExamples()
-		# se ajustan los pesos utilizando LMS
-		lms(trainingExamples)
-		listaWeights.append((w1, w2, w3, w4))
-	# impresion de historial de pesos a un formato graficable en latex
-	# w1
-	print "won = {}, lost = {}, tied = {}".format(won, lost, tied)
-	print "###### w1 ######"
-	print "coordinates {"
-	for index, tupla in enumerate(listaWeights):
-		print (index, tupla[0]),
-	print
-	print "};"
-	print
-	# w2
-	print "###### w2 ######"
-	print "coordinates {"
-	for index, tupla in enumerate(listaWeights):
-		print (index, tupla[1]),
-	print
-	print "};"
-	print
-	# w3
-	print "###### w3 ######"
-	print "coordinates {"
-	for index, tupla in enumerate(listaWeights):
-		print (index, tupla[2]),
-	print
-	print "};"
-	print
-	# w4
-	print "###### w4 ######"
-	print "coordinates {"
-	for index, tupla in enumerate(listaWeights):
-		print (index, tupla[3]),
-	print
-	print "};"
-
 # generacion de ejemplos de entrenamiento
-def generateTrainingExamples():
+def main():
 	# se obtiene un tablero inicial
 	newBoard = getNewBoard()
-	# se simula la realizacion de la partida
-	history = playGame(newBoard)
-	# aqui se guardaran los ejemplos de entrenamiento (tablero, valoracion)
-	trainingExamples = []
-	for board in history:
-		# printBoard(board)
-		index = history.index(board)
-		next_board = history[index+1] if index + 1 < len(history) else None
-		if (next_board == None): #tablero final
-			blackCheckerAmount = cantFichasColor(board, True)
-			whiteCheckerAmount = cantFichasColor(board, False)
-			if (consideringAmountDiff):
-				diff = blackCheckerAmount - whiteCheckerAmount
-				# coeficiente de la funcion interpolada en base a los puntos de la forma
-				# (diff, value): {(-12,-100),(-6,-50),(0,0),(6,50),(12,100)}
-				# Se asigna un puntaje en base a la diferencia de fichas
-				coefficient = 25.0 / 3
-				trainingExamples.append((board, diff * coefficient))
-			else:
-				# Aqui se asigna puntaje en base a si se gano, perdio o empato
-				if (blackCheckerAmount > whiteCheckerAmount):
-					trainingExamples.append((board, 100))
-				elif (whiteCheckerAmount > blackCheckerAmount):
-					trainingExamples.append((board, -100))
-				else:
-					trainingExamples.append((board, 0))
-		else:
-			# si el tablero no es final, se le asigna como valor
-			# el valor del siguiente tablero
-			x1 = cantFichasColor(next_board, True)
-			x2 = cantFichasColor(next_board, False)
-			x3 = cantFichasAmenazadas(next_board, True)
-			x4 = cantFichasAmenazadas(next_board, False)
-			value = v(x1, x2, x3, x4)
-			trainingExamples.append((board, value))
-	return trainingExamples
-
-# utilidades de manejo de tablero
+	playGame(newBoard)
 
 def printBoard(board):
     for i in range(len(board)):
@@ -305,9 +185,28 @@ def playGame(board):
 	blackCanMove = True
 	whiteCanMove = True
 	history.append(board)
+	printBoard(board)
 	while True:
 		# mueve el jugador de fichas negras
-		nextBoard = move(True, board)
+		if (playerIsBlack):
+			entrada = raw_input("Ingrese el indice 0 de la posicion inicial: ")
+			x = int(entrada)
+			entrada = raw_input("Ingrese el indice 1 de la posicion inicial: ")
+			y = int(entrada)
+			initPos = (x,y)
+			print initPos
+			entrada = raw_input("Ingrese el indice 0 de la posicion final: ")
+			x = int(entrada)
+			entrada = raw_input("Ingrese el indice 1 de la posicion final: ")
+			y = int(entrada)
+			endPos = (x,y)
+			print endPos
+			nextBoard = []
+			while (len(nextBoard) == 0):
+				nextBoard = playerMove(initPos, endPos, True, board)
+			print "fag"
+		else:
+			nextBoard = move(True, board)
 		if (whiteCanMove):
 			if (len(nextBoard) != 0):
 				board = nextBoard
@@ -319,7 +218,22 @@ def playGame(board):
 			break
 		# mueve el jugador de fichas negras
 		if (blackCanMove):
-			nextBoard = move(False, board)
+			if (not playerIsBlack):
+				entrada = raw_input("Ingrese el indice 0 de la posicion inicial: ")
+				x = int(entrada)
+				entrada = raw_input("Ingrese el indice 1 de la posicion inicial: ")
+				y = int(entrada)
+				initPos = (x,y)
+				entrada = raw_input("Ingrese el indice 0 de la posicion final: ")
+				x = int(entrada)
+				entrada = raw_input("Ingrese el indice 1 de la posicion final: ")
+				y = int(entrada)
+				endPos = (x,y)
+				nextBoard = []
+				while (len(nextBoard) == 0):
+					nextBoard = playerMove(initPos, endPos, False, board)
+			else:
+				nextBoard = move(False, board)
 			if (len(nextBoard) != 0):
 				board = nextBoard
 				# guardar board previa en un historial
@@ -328,17 +242,47 @@ def playGame(board):
 				whiteCanMove = False
 		else:# no hay mas movimientos para las fichas negras (gana white)
 			break
-	if (len(history) > 0):
-		# se actualizan contadores de partidas jugadas
-		blackAmount = cantFichasColor(history[-1], True)
-		whiteAmount = cantFichasColor(history[-1], False)
-		if (blackAmount > whiteAmount):
-			won += 1
-		elif (blackAmount < whiteAmount):
-			lost += 1
+		printBoard(board)
+
+def playerMove(initPos, endPos, isBlack, board):
+	#se asume que el player juega correctamente mayoritariamente
+	success = False
+	newBoard = []
+	while (True):
+		if (not checkLegalPosition(initPos, board)):
+			print "Posicion inicial ilegal, intente de nuevo"
+			break
+		elif (not checkLegalPosition(endPos, board)):
+			print "Posicion final ilegal, intente de nuevo"
+			break
 		else:
-			tied += 1
-	return history
+			if (isBlack):
+				if (board[initPos[0]][initPos[1]] != "B"):
+					print "La primera celda no tiene una ficha tuya, intentalo de nuevo"
+					break
+				elif (board[endPos[0]][endPos[1]] == "B"):
+					print "La segunda celda tiene una ficha tuya, intentalo de nuevo"
+					break
+				else:
+					newBoard = copy.deepcopy(board)
+					swapCellContents(initPos, endPos, newBoard)
+					break
+			else:
+				if (board[initPos[0]][initPos[1]] != "W"):
+					print "La primera celda no tiene una ficha tuya, intentalo de nuevo"
+					break
+				elif (board[endPos[0]][endPos[1]] == "W"):
+					print "La segunda celda tiene una ficha tuya, intentalo de nuevo"				
+					break
+				else:
+					newBoard = copy.deepcopy(board)
+					swapCellContents(initPos, endPos, newBoard)
+					break
+	return newBoard
+
+
+
+
 
 def move(isBlack, board):
 	if (isBlack):
@@ -386,57 +330,6 @@ def getNewBoard():
 	    ["O", "B", "O", "B", "O", "B", "O", "B"],
 	    ["B", "O", "B", "O", "B", "O", "B", "O"]
 	    ]
-
-
-	# amountOfBoards = 4
-	# boardChoice = math.floor(random.random() * amountOfBoards)
-	# if (boardChoice == 0):
-	# 	#tablero inicial
-	# 	board = [
-	# 	    ["O", "W", "O", "W", "O", "W", "O", "W"],
-	# 	    ["W", "O", "W", "O", "W", "O", "W", "O"],
-	# 	    ["O", "W", "O", "W", "O", "W", "O", "W"],
-	# 	    ["O", "O", "O", "O", "O", "O", "O", "O"],
-	# 	    ["O", "O", "O", "O", "O", "O", "O", "O"],
-	# 	    ["B", "O", "B", "O", "B", "O", "B", "O"],
-	# 	    ["O", "B", "O", "B", "O", "B", "O", "B"],
-	# 	    ["B", "O", "B", "O", "B", "O", "B", "O"]
-	# 	    ]
-	# elif (boardChoice == 1):
-	# 	#comida doble
-	# 	board = [
-	# 	    ["O", "O", "O", "O", "O", "O", "O", "O"],
-	# 	    ["O", "O", "O", "O", "O", "O", "W", "O"],
-	# 	    ["O", "O", "O", "O", "O", "O", "O", "O"],
-	# 	    ["O", "O", "O", "O", "W", "O", "W", "O"],
-	# 	    ["O", "O", "O", "O", "O", "O", "O", "O"],
-	# 	    ["O", "O", "O", "O", "W", "O", "O", "O"],
-	# 	    ["O", "O", "O", "B", "O", "O", "O", "O"],
-	# 	    ["O", "O", "O", "O", "O", "O", "O", "O"]
-	# 	    ]
-	# elif (boardChoice == 2):
-	# 	#tablero en donde las negras pueden comer una blanca
-	# 	board = [
-	# 	    ["O", "W", "O", "W", "O", "W", "O", "W"],
-	# 	    ["W", "O", "W", "O", "W", "O", "W", "O"],
-	# 	    ["O", "W", "O", "O", "O", "O", "O", "W"],
-	# 	    ["O", "O", "O", "O", "W", "O", "W", "O"],
-	# 	    ["O", "B", "O", "B", "O", "O", "O", "O"],
-	# 	    ["O", "O", "B", "O", "O", "O", "B", "O"],
-	# 	    ["O", "B", "O", "B", "O", "B", "O", "B"],
-	# 	    ["B", "O", "B", "O", "B", "O", "B", "O"]
-	# 	    ]
-	# elif (boardChoice == 3):
-	# 	board = [
-	# 	    ["O", "W", "O", "W", "O", "W", "O", "W"],
-	# 	    ["W", "O", "W", "O", "W", "O", "W", "O"],
-	# 	    ["O", "W", "O", "O", "O", "W", "O", "W"],
-	# 	    ["O", "O", "O", "O", "O", "O", "O", "O"],
-	# 	    ["O", "B", "O", "B", "O", "O", "O", "O"],
-	# 	    ["O", "O", "B", "O", "O", "O", "W", "O"],
-	# 	    ["O", "B", "O", "B", "O", "B", "O", "B"],
-	# 	    ["B", "O", "B", "O", "B", "O", "B", "O"]
-	# 	    ]	    
 	return board
 
 main()
