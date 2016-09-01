@@ -110,7 +110,7 @@ def genDecisionTree(data, attributes, target):
 	tree = {bestAttr:{}}
 
 	# Genero una rama para cada valor del atributo elegido
-	for val in data[:,bestAttrIndex]:
+	for val in set(data[:,bestAttrIndex]):
 		
 		#Subconjunto de datos para cada valor del atributo
 		valSubset = np.array([x for x in data if x[bestAttrIndex] == val])		
