@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import reader
+import treePrinting
 
 def main():
     # attrs=['a','b','target']
@@ -12,7 +13,10 @@ def main():
     # print entropy(attrs, data, 'G3')
     # #Imprime el information gain del atributo 'Walc' respecto a G3.
     # print informationGain(attrs, data, 'Walc', 'G3')
-    # print genDecisionTree(data, attrs, 'G3')
+    # tree = genDecisionTree(data, attrs, 'G3')
+    # print tree
+    # #Imprime arbol exportable a pdf.
+    # treePrinting.printTree(tree)
     testExample()
 
 def testExample():
@@ -45,6 +49,7 @@ def testExample():
     for instance in data:
     	tmpInstance = instance[:-1]
     	evalInstance(tmpInstance, tmpAttrs, tree)
+    treePrinting.printTree(tree)
     
 #Retorna la entropia de un conjunto de datos para un determinado atributo objetivo.
 def entropy(attributes, data, targetAttr):
