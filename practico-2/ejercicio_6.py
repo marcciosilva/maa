@@ -4,20 +4,28 @@ import reader
 import treePrinting
 
 def main():
-    # attrs=['a','b','target']
-    # data=np.array([[1,2,1], [1,4,1], [1,6,1], [1,2,1], [1,4,1], [1,6,1], [1,3,0], [2,3,0]])
-    # fileName = "data/student-mat.csv"
-    # csvData = reader.getDataFromCsv(fileName)
-    # attrs, data = csvData[0], np.array(csvData[1])
-    # #Imprime la entropia del conjunto original con respecto a G3
-    # print entropy(attrs, data, 'G3')
-    # #Imprime el information gain del atributo 'Walc' respecto a G3.
-    # print informationGain(attrs, data, 'Walc', 'G3')
-    # tree = genDecisionTree(data, attrs, 'G3')
-    # print tree
-    # #Imprime arbol exportable a pdf.
-    # treePrinting.printTree(tree)
-    testExample()
+    attrs=['a','b','target']
+    fileName = "data/student-mat.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    attrs, data = csvData[0], np.array(csvData[1])
+
+    #Obtengo el resto de los datos.
+    fileName = "data/student-por.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    #Agrego nueva data a la anterior.
+    data = np.concatenate((data, csvData[1]))
+
+
+
+    #Imprime la entropia del conjunto original con respecto a G3
+    print entropy(attrs, data, 'G3')
+    #Imprime el information gain del atributo 'Walc' respecto a G3.
+    print informationGain(attrs, data, 'Walc', 'G3')
+    tree = genDecisionTree(data, attrs, 'G3')
+    print tree
+    #Imprime arbol exportable a pdf.
+    treePrinting.printTree(tree)
+    # testExample()
 
 def testExample():
 	#Prueba utilizando ejemplo del capitulo 3 del Mitchell.
