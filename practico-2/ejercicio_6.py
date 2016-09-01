@@ -3,16 +3,17 @@ import math
 import reader
 
 def main():
-    attrs=['a','b','target']
-    data=np.array([[1,2,1], [1,4,1], [1,6,1], [1,2,1], [1,4,1], [1,6,1], [1,3,0], [2,3,0]])
-    fileName = "data/student-mat.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    attrs, data = csvData[0], np.array(csvData[1])
-    #Imprime la entropia del conjunto original con respecto a G3
-    print entropy(attrs, data, 'G3')
-    #Imprime el information gain del atributo 'Walc' respecto a G3.
-    print informationGain(attrs, data, 'Walc', 'G3')
-    print genDecisionTree(data, attrs, 'G3')
+    # attrs=['a','b','target']
+    # data=np.array([[1,2,1], [1,4,1], [1,6,1], [1,2,1], [1,4,1], [1,6,1], [1,3,0], [2,3,0]])
+    # fileName = "data/student-mat.csv"
+    # csvData = reader.getDataFromCsv(fileName)
+    # attrs, data = csvData[0], np.array(csvData[1])
+    # #Imprime la entropia del conjunto original con respecto a G3
+    # print entropy(attrs, data, 'G3')
+    # #Imprime el information gain del atributo 'Walc' respecto a G3.
+    # print informationGain(attrs, data, 'Walc', 'G3')
+    # print genDecisionTree(data, attrs, 'G3')
+    testExample()
 
 def testExample():
 	#Prueba utilizando ejemplo del capitulo 3 del Mitchell.
@@ -38,7 +39,12 @@ def testExample():
     # print "Humidity information gain: " + str(informationGain(attrs, data, 'Humidity', 'PlayTennis'))
     # print "Wind information gain: " + str(informationGain(attrs, data, 'Wind', 'PlayTennis'))
     # print "Temperature information gain: " + str(informationGain(attrs, data, 'Temperature', 'PlayTennis'))
-    print genDecisionTree(data, attrs, 'PlayTennis')	
+    tree = genDecisionTree(data, attrs, 'PlayTennis')
+    print tree
+    tmpAttrs = attrs[:-1]
+    for instance in data:
+    	tmpInstance = instance[:-1]
+    	evalInstance(tmpInstance, tmpAttrs, tree)
     
 #Retorna la entropia de un conjunto de datos para un determinado atributo objetivo.
 def entropy(attributes, data, targetAttr):
@@ -157,4 +163,23 @@ def genDecisionTree(data, attributes, target):
         tree[bestAttr][val] = subtree
     
     return tree
+
+#Clasifica una instancia de acuerdo a un arbol de decision.
+def evalInstance(instance, attributes, decisionTree):
+	#Obtengo nodo.
+	node = decisionTree.keys()[0]
+	#Obtengo indice del atributo en el arreglo de atributos posibles.
+	index = attributes.index(node)
+	#Asumiendo que el valor del atributo esta entre las claves,
+	#determino el indice de la rama por la que tiene que seguir la instancia.
+	#Valor del atributo en la instance.
+	instanceAttrValue = decisionTree[node][instance[index]]
+	#Si estoy frente a una nueva rama, me sigo moviendo en ella
+	if (isinstance(instanceAttrValue,dict)):
+		return evalInstance(instance, attributes, instanceAttrValue)
+	#De otra manera, devuelvo la clasificacion obtenida.
+	else:
+		print str(instance) + " classifies as " + instanceAttrValue
+		return instanceAttrValue
+
 main()
