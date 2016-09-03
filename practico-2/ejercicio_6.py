@@ -21,7 +21,11 @@ def main():
     print entropy(attrs, data, 'G3')
     #Imprime el information gain del atributo 'Walc' respecto a G3.
     print informationGain(attrs, data, 'Walc', 'G3')
-    tree = genDecisionTree(data, attrs, 'G3')
+
+    #Calcular de alguna forma el maxHeight optimo
+    #Le asigno un valor adecuado
+    maxHeight = 7
+    tree = genDecisionTree(data, attrs, 'G3',maxHeight,0)
     print tree
     #Imprime arbol exportable a pdf.
     treePrinting.printTree(tree)
@@ -51,7 +55,7 @@ def testExample():
     # print "Humidity information gain: " + str(informationGain(attrs, data, 'Humidity', 'PlayTennis'))
     # print "Wind information gain: " + str(informationGain(attrs, data, 'Wind', 'PlayTennis'))
     # print "Temperature information gain: " + str(informationGain(attrs, data, 'Temperature', 'PlayTennis'))
-    tree = genDecisionTree(data, attrs, 'PlayTennis')
+    tree = genDecisionTree(data, attrs, 'PlayTennis',3,0)
     print tree
     tmpAttrs = attrs[:-1]
     for instance in data:
@@ -133,7 +137,7 @@ def mostCommonValue(targetValues):
     return commonValue
 
 #Retorna el arbol de decision.
-def genDecisionTree(data, attributes, target):
+def genDecisionTree(data, attributes, target,maxHeight,currentHeight):
     
     data = np.array(data[:])
 
@@ -149,9 +153,17 @@ def genDecisionTree(data, attributes, target):
     if (len(attributes) -1) == 0:
         return mostCommonValue(targetValues)    
 
+    #Si llego al largo maximo establecido para las ramas, etiquetar con el valor mas comun.
+    if currentHeight == maxHeight:
+        return mostCommonValue(targetValues)
+
+    #Si no alcance el largo maximo, continua creciendo la rama.
+    currentHeight = currentHeight + 1
+
     # Se elige el mejor atributo segun su information gain.
     bestAttr = getBestAttr(data, attributes, target)
     bestAttrIndex = attributes.index(bestAttr)
+
     #Genero una rama.
     tree = {bestAttr:{}}
 
@@ -170,7 +182,7 @@ def genDecisionTree(data, attributes, target):
         newAttr.remove(bestAttr)
         
         #Llamada recursiva.
-        subtree = genDecisionTree(valSubset, newAttr, target)
+        subtree = genDecisionTree(valSubset, newAttr, target, maxHeight, currentHeight)
     
     	#Agrego el subarbol al nodo actual.
         tree[bestAttr][val] = subtree
@@ -196,3 +208,4 @@ def evalInstance(instance, attributes, decisionTree):
 		return instanceAttrValue
 
 main()
+#testExample()
