@@ -16,7 +16,6 @@ def main():
     data = np.concatenate((data, csvData[1]))
 
 
-
     #Imprime la entropia del conjunto original con respecto a G3
     print entropy(attrs, data, 'G3')
     #Imprime el information gain del atributo 'Walc' respecto a G3.
@@ -207,5 +206,45 @@ def evalInstance(instance, attributes, decisionTree):
 		print str(instance) + " classifies as " + instanceAttrValue
 		return instanceAttrValue
 
-main()
+#def crossValidation(data, attributes,k):
+   
+
+def getFold(i,data,fold_size):
+    return data[i*fold_size:(i+1)*fold_size,:]
+
+def getSampleWithoutFold(i,data,fold_size,k):
+    return np.concatenate((data[0*fold_size:1*fold_size,:],data[2*fold_size:k*fold_size,:]))
+
+def crossValidation():
+    attrs=['a','b','target']
+    fileName = "data/student-mat.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    attrs, data = csvData[0], np.array(csvData[1])
+
+    #Obtengo el resto de los datos.
+    fileName = "data/student-por.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    #Agrego nueva data a la anterior.
+    data = np.concatenate((data, csvData[1]))
+
+    k = 10
+    data_size = len(data)
+    s_size = data_size * 4/5
+    fold_size  = s_size / k
+    print fold_size
+    s = data[:s_size,:]
+    #print s
+    #T1
+    fold = getFold(1,s,fold_size)
+    #fold = data[1*fold_size:2*fold_size,:]
+    print 'T1'
+    print fold
+    #D-T1
+    s_fold = getSampleWithoutFold(1,s,fold_size,k)
+    #s_fold = np.concatenate((data[0*fold_size:1*fold_size,:],data[2*fold_size:k*fold_size,:]))
+    print 'D-T1'
+    print s_fold
+    
+#main()
 #testExample()
+crossValidation()
