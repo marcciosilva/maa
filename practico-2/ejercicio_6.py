@@ -210,10 +210,10 @@ def evalInstance(instance, attributes, decisionTree):
    
 
 def getFold(i,data,fold_size):
-    return data[i*fold_size:(i+1)*fold_size,:]
+    return data[(i-1)*fold_size:i*fold_size,:]
 
 def getSampleWithoutFold(i,data,fold_size,k):
-    return np.concatenate((data[0*fold_size:1*fold_size,:],data[2*fold_size:k*fold_size,:]))
+    return np.concatenate((data[0:(i-1)*fold_size,:],data[i*fold_size:k*fold_size,:]))
 
 def crossValidation():
     attrs=['a','b','target']
@@ -230,6 +230,7 @@ def crossValidation():
     k = 10
     data_size = len(data)
     s_size = data_size * 4/5
+    print s_size
     fold_size  = s_size / k
     print fold_size
     s = data[:s_size,:]
