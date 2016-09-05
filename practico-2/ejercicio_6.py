@@ -215,6 +215,20 @@ def getFold(i,data,fold_size):
 def getSampleWithoutFold(i,data,fold_size,k):
     return np.concatenate((data[0:(i-1)*fold_size,:],data[i*fold_size:k*fold_size,:]))
 
+def error(tree,attrs,targetAttr,T_i):
+    #falta terminar
+    """
+    tmpAttrs = attrs[:-1]
+    for instance in T_i:
+        tmpInstance = instance[:-1]
+        h_x = evalInstance(tmpInstance, tmpAttrs, tree)
+        f_x = tmpInstance[attrs.index(targetAttr)]
+        e_x = f_x - h_x
+        e_aux = e_aux + e_x
+    return (1/len(T_i)*e_aux)
+    """
+    return 0
+
 def crossValidation():
     attrs=['a','b','target']
     fileName = "data/student-mat.csv"
@@ -236,15 +250,27 @@ def crossValidation():
     s = data[:s_size,:]
     #print s
     #T1
-    fold = getFold(1,s,fold_size)
+    #fold = getFold(1,s,fold_size)
     #fold = data[1*fold_size:2*fold_size,:]
-    print 'T1'
-    print fold
+    #print 'T1'
+    #print fold
     #D-T1
-    s_fold = getSampleWithoutFold(1,s,fold_size,k)
+    #s_fold = getSampleWithoutFold(1,s,fold_size,k)
     #s_fold = np.concatenate((data[0*fold_size:1*fold_size,:],data[2*fold_size:k*fold_size,:]))
-    print 'D-T1'
-    print s_fold
+    #print 'D-T1'
+    #print s_fold
+    maxHeight = 7
+    targetAttr = 'G3'
+    i = 1
+    e_aux = 0
+    while i <= k:
+        S_i = getSampleWithoutFold(i,s,fold_size,k) 
+        tree = genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
+        T_i = getFold(i,s,fold_size)
+        e_i = error(tree,attrs,targetAttr,T_i)
+        e_aux = e_aux + e_i
+        i = i + 1
+    e = (1/k) * e_aux
     
 #main()
 #testExample()
