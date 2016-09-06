@@ -4,7 +4,6 @@ import reader
 import treePrinting
 
 def main():
-    attrs=['a','b','target']
     fileName = "data/student-mat.csv"
     csvData = reader.getDataFromCsv(fileName)
     attrs, data = csvData[0], np.array(csvData[1])
@@ -137,24 +136,25 @@ def mostCommonValue(targetValues):
 
 #Retorna el arbol de decision.
 def genDecisionTree(data, attributes, target,maxHeight,currentHeight):
-    
     data = np.array(data[:])
-
     #Obtengo un arreglo con todos los valores del atributo target
     #en cada instancia.
     targetValues = data[:,attributes.index(target)]
+    mcv = mostCommonValue(targetValues)
     
-    #Si todos los nodos tienen el mismo valor, etiquetar con ese valor.
+    #Si todas las instancias tienen el mismo valor para el atributo,
+    #etiquetar con ese valor.
     if len(set(targetValues)) == 1:
         return targetValues[0]
     
     #Si no quedan atributos, etiquetar con el valor mas comun.
     if (len(attributes) -1) == 0:
-        return mostCommonValue(targetValues)    
+        return mcv
 
-    #Si llego al largo maximo establecido para las ramas, etiquetar con el valor mas comun.
+    #Si llego al largo maximo establecido para las ramas, etiquetar 
+    #con el valor mas comun.
     if currentHeight == maxHeight:
-        return mostCommonValue(targetValues)
+        return mcv
 
     #Si no alcance el largo maximo, continua creciendo la rama.
     currentHeight = currentHeight + 1
@@ -163,8 +163,15 @@ def genDecisionTree(data, attributes, target,maxHeight,currentHeight):
     bestAttr = getBestAttr(data, attributes, target)
     bestAttrIndex = attributes.index(bestAttr)
 
+    bestAttrTargetValues = data[:,bestAttrIndex]
+    bestAttrMostCommonValue = mostCommonValue(bestAttrTargetValues)
+
+
     #Genero una rama.
-    tree = {bestAttr:{}}
+    # tree = {bestAttr:{}}
+    #Cada nodo tendra su valor mas comun (de acuerdo a ejemplos de 
+    #entrenamiento) asociado
+    tree = {(bestAttr, bestAttrMostCommonValue):{}}
 
     # Genero una rama para cada valor del atributo elegido.
     for val in set(data[:,bestAttrIndex]):
@@ -184,7 +191,7 @@ def genDecisionTree(data, attributes, target,maxHeight,currentHeight):
         subtree = genDecisionTree(valSubset, newAttr, target, maxHeight, currentHeight)
     
     	#Agrego el subarbol al nodo actual.
-        tree[bestAttr][val] = subtree
+        tree[(bestAttr,bestAttrMostCommonValue)][val] = subtree
     
     return tree
 
@@ -193,18 +200,29 @@ def evalInstance(instance, attributes, decisionTree):
 	#Obtengo nodo.
 	node = decisionTree.keys()[0]
 	#Obtengo indice del atributo en el arreglo de atributos posibles.
-	index = attributes.index(node)
-	#Asumiendo que el valor del atributo esta entre las claves,
-	#determino el indice de la rama por la que tiene que seguir la instancia.
-	#Valor del atributo en la instance.
-	instanceAttrValue = decisionTree[node][instance[index]]
+	index = attributes.index(node[0])
+	#Si el valor del atributo de interes no es contemplado por el arbol,
+	#se lo intercambia por el valor mas comun para ese atributo.
+
+	attributeValue = instance[index]
+	#Si no es una etiqueta soportada.
+	if (not attributeValue in decisionTree[node].keys()):
+		# print decisionTree[node].keys()
+		# print "Tree node is " + str(node)
+		#Valor mas comun asociado en construccion.
+		# print "Unknown value " + "(" + attributeValue + ")" + " at node " + node[0]
+		attributeValue = node[1]
+		# print "Just assigned " + attributeValue + " to it"
+	#De otra manera, simplemente sigo la rama que corresponda con
+	#el valor original del atributo para la instancia.
+	nextBranchOrValue = decisionTree[node][attributeValue]
 	#Si estoy frente a una nueva rama, me sigo moviendo en ella
-	if (isinstance(instanceAttrValue,dict)):
-		return evalInstance(instance, attributes, instanceAttrValue)
+	if (isinstance(nextBranchOrValue,dict)):
+		return evalInstance(instance, attributes, nextBranchOrValue)
 	#De otra manera, devuelvo la clasificacion obtenida.
 	else:
-		print str(instance) + " classifies as " + instanceAttrValue
-		return instanceAttrValue
+		# print str(instance) + " classifies as " + nextBranchOrValue
+		return nextBranchOrValue
 
 #def crossValidation(data, attributes,k):
    
@@ -217,24 +235,25 @@ def getSampleWithoutFold(i,data,fold_size,k):
 
 def error(tree,attrs,targetAttr,T_i):
     #falta terminar
-    """
     tmpAttrs = attrs[:-1]
     for instance in T_i:
         tmpInstance = instance[:-1]
-        h_x = evalInstance(tmpInstance, tmpAttrs, tree)
-        f_x = tmpInstance[attrs.index(targetAttr)]
+        h_x = float(evalInstance(tmpInstance, tmpAttrs, tree))
+        f_x = float(tmpInstance[attrs.index(targetAttr) - 1])
         e_x = f_x - h_x
+        try:
+        	e_aux += e_x
+        except NameError:
+        	e_aux = e_x
         e_aux = e_aux + e_x
     return (1/len(T_i)*e_aux)
-    """
-    return 0
+    # return 0
 
 def crossValidation():
-    attrs=['a','b','target']
     fileName = "data/student-mat.csv"
     csvData = reader.getDataFromCsv(fileName)
     attrs, data = csvData[0], np.array(csvData[1])
-
+    print "Attributes " + str(attrs)
     #Obtengo el resto de los datos.
     fileName = "data/student-por.csv"
     csvData = reader.getDataFromCsv(fileName)
@@ -244,9 +263,10 @@ def crossValidation():
     k = 10
     data_size = len(data)
     s_size = data_size * 4/5
-    print s_size
+    print "Total data size is " + str(data_size)
+    print "Sample size for cross validation is " + str(s_size)
     fold_size  = s_size / k
-    print fold_size
+    print "Fold size is " + str(fold_size)
     s = data[:s_size,:]
     #print s
     #T1
@@ -262,16 +282,18 @@ def crossValidation():
     maxHeight = 7
     targetAttr = 'G3'
     i = 1
-    e_aux = 0
-    while i <= k:
+    e_aux = 0.0
+    for i in range(1,k+1):
         S_i = getSampleWithoutFold(i,s,fold_size,k) 
         tree = genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
+        # treePrinting.printTree(tree)
         T_i = getFold(i,s,fold_size)
         e_i = error(tree,attrs,targetAttr,T_i)
-        e_aux = e_aux + e_i
-        i = i + 1
-    e = (1/k) * e_aux
+        e_aux += e_i
+    e = (1.0/k) * e_aux
+    print "e = " + str(e)
     
-#main()
+# main()
 #testExample()
 crossValidation()
+# testExample()
