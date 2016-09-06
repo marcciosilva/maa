@@ -69,8 +69,14 @@ def parteB():
         e_i = sampleError(tree,attrs,targetAttr,T_i)
         print "Error estimado del subconjunto T_" + str(i) + " = " + str(e_i)
         e_aux += e_i
+    #Promedio de errores estimados para cada subconjunto.
     e = (1.0/k) * e_aux
-    print "El error estimado obtenido mediante validacion cruzada es "  + str(e)
+    print "El error estimado obtenido mediante validacion cruzada es "  + str(e) + " en promedio"
+
+    #Constante de intervalo de confianza para un 95% de confianza.
+    constanteIntervaloConfianza = 1.96
+    diferencia = constanteIntervaloConfianza * math.sqrt((e * (1.0 - e)) / k)
+    print "Un intervalo de confianza del 95% para el error calculado es " + str((e - diferencia, e + diferencia))
 
 #Retorna la entropia de un conjunto de datos para un determinado atributo objetivo.
 def entropy(attributes, data, targetAttr):
