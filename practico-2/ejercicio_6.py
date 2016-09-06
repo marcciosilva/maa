@@ -1,66 +1,77 @@
 import numpy as np
 import math
 import reader
-import treePrinting
+#import treePrinting
 
-def main():
+def parteA():
+    print "### Parte A ###"
+    #Obtengo el conjunto completo de datos de prueba.
     fileName = "data/student-mat.csv"
     csvData = reader.getDataFromCsv(fileName)
     attrs, data = csvData[0], np.array(csvData[1])
+    #Obtengo el resto de los datos.
+    fileName = "data/student-por.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    #Agrego nueva data a la anterior variable.
+    data = np.concatenate((data, csvData[1]))
+    #Se determina altura maxima.
+    maxHeight = 7
+    tree = genDecisionTree(data, attrs, 'G3',maxHeight,0)
+    #Se imprime arbol a archivo de texto
+    f = open('out/arbol-parte-a.txt', 'w')
+    f.write(str(tree))
+    f.close()
+    print "Arbol exportado a out/arbol-parte-a.txt"
+    #Imprime arbol exportable a pdf.
+    #treePrinting.printTree(tree)
 
+def parteB():
+    print "### Parte B ###"
+    fileName = "data/student-mat.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    attrs, data = csvData[0], np.array(csvData[1])
+    # print "Atributos : " + str(attrs)
     #Obtengo el resto de los datos.
     fileName = "data/student-por.csv"
     csvData = reader.getDataFromCsv(fileName)
     #Agrego nueva data a la anterior.
     data = np.concatenate((data, csvData[1]))
-
-
-    #Imprime la entropia del conjunto original con respecto a G3
-    print entropy(attrs, data, 'G3')
-    #Imprime el information gain del atributo 'Walc' respecto a G3.
-    print informationGain(attrs, data, 'Walc', 'G3')
-
-    #Calcular de alguna forma el maxHeight optimo
-    #Le asigno un valor adecuado
+    k = 10
+    data_size = len(data)
+    s_size = data_size * 4/5
+    print "Cantidad total de instancias en D : " + str(data_size)
+    print "Size de muestra para validacion cruzada : " + str(s_size)
+    fold_size  = s_size / k
+    print "Size de cada subconjunto T_i : " + str(fold_size)
+    s = data[:s_size,:]
+    #print s
+    #T1
+    #fold = getFold(1,s,fold_size)
+    #fold = data[1*fold_size:2*fold_size,:]
+    #print 'T1'
+    #print fold
+    #D-T1
+    #s_fold = getSampleWithoutFold(1,s,fold_size,k)
+    #s_fold = np.concatenate((data[0*fold_size:1*fold_size,:],data[2*fold_size:k*fold_size,:]))
+    #print 'D-T1'
+    #print s_fold
     maxHeight = 7
-    tree = genDecisionTree(data, attrs, 'G3',maxHeight,0)
-    print tree
-    #Imprime arbol exportable a pdf.
-    treePrinting.printTree(tree)
-    # testExample()
+    targetAttr = 'G3'
+    i = 1
+    e_aux = 0.0
+    for i in range(1,k+1):
+        #Se obtiene el conjunto (S_i-Ti), o sea toda la data sin el fold Ti.
+        S_i = getSampleWithoutFold(i,s,fold_size,k) 
+        #Se entrena con el conjunto S_i
+        tree = genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
+        #Se obtiene el subconjunto que no se uso para entrenar.
+        T_i = getFold(i,s,fold_size)
+        e_i = sampleError(tree,attrs,targetAttr,T_i)
+        print "Error estimado del subconjunto T_" + str(i) + " = " + str(e_i)
+        e_aux += e_i
+    e = (1.0/k) * e_aux
+    print "El error estimado obtenido mediante validacion cruzada es "  + str(e)
 
-def testExample():
-    #Prueba utilizando ejemplo del capitulo 3 del Mitchell.
-    attrs = ['Outlook', 'Temperature', 'Humidity', 'Wind', 'PlayTennis']
-    data = np.array([
-        ["Sunny", "Hot", "High", "Weak", "No"], 
-        ["Sunny", "Hot", "High", "Strong", "No"],
-        ["Overcast", "Hot", "High", "Weak", "Yes"],
-        ["Rain", "Mild", "High", "Weak", "Yes"],
-        ["Rain", "Cool", "Normal", "Weak", "Yes"],
-        ["Rain", "Cool", "Normal", "Strong", "No"],
-        ["Overcast", "Cool", "Normal", "Strong", "Yes"],
-        ["Sunny", "Mild", "High", "Weak", "No"],
-        ["Sunny", "Cool", "Normal", "Weak", "Yes"],
-        ["Rain", "Mild", "Normal", "Weak", "Yes"],
-        ["Sunny", "Mild", "Normal", "Strong", "Yes"],
-        ["Overcast", "Mild", "High", "Strong", "Yes"],
-        ["Overcast", "Hot", "Normal", "Weak", "Yes"],
-        ["Rain", "Mild", "High", "Strong", "No"]
-        ])
-    # print entropy(attrs, data, 'PlayTennis')
-    # print "Outlook information gain: " + str(informationGain(attrs, data, 'Outlook', 'PlayTennis'))
-    # print "Humidity information gain: " + str(informationGain(attrs, data, 'Humidity', 'PlayTennis'))
-    # print "Wind information gain: " + str(informationGain(attrs, data, 'Wind', 'PlayTennis'))
-    # print "Temperature information gain: " + str(informationGain(attrs, data, 'Temperature', 'PlayTennis'))
-    tree = genDecisionTree(data, attrs, 'PlayTennis',3,0)
-    print tree
-    tmpAttrs = attrs[:-1]
-    for instance in data:
-        tmpInstance = instance[:-1]
-        evalInstance(tmpInstance, tmpAttrs, tree)
-    treePrinting.printTree(tree)
-    
 #Retorna la entropia de un conjunto de datos para un determinado atributo objetivo.
 def entropy(attributes, data, targetAttr):
 
@@ -258,54 +269,10 @@ def sampleError(tree,attrs,targetAttr,T_i):
         e_aux = e_aux + e_x
     return (1.0/len(T_i)*e_aux)
 
-def crossValidation():
-    print "### Parte B ###"
-    fileName = "data/student-mat.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    attrs, data = csvData[0], np.array(csvData[1])
-    # print "Atributos : " + str(attrs)
-    #Obtengo el resto de los datos.
-    fileName = "data/student-por.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    #Agrego nueva data a la anterior.
-    data = np.concatenate((data, csvData[1]))
-    k = 10
-    data_size = len(data)
-    s_size = data_size * 4/5
-    print "Cantidad total de instancias en D : " + str(data_size)
-    print "Size de muestra para validacion cruzada : " + str(s_size)
-    fold_size  = s_size / k
-    print "Size de cada subconjunto T_i : " + str(fold_size)
-    s = data[:s_size,:]
-    #print s
-    #T1
-    #fold = getFold(1,s,fold_size)
-    #fold = data[1*fold_size:2*fold_size,:]
-    #print 'T1'
-    #print fold
-    #D-T1
-    #s_fold = getSampleWithoutFold(1,s,fold_size,k)
-    #s_fold = np.concatenate((data[0*fold_size:1*fold_size,:],data[2*fold_size:k*fold_size,:]))
-    #print 'D-T1'
-    #print s_fold
-    maxHeight = 7
-    targetAttr = 'G3'
-    i = 1
-    e_aux = 0.0
-    for i in range(1,k+1):
-        #Se obtiene el conjunto (S_i-Ti), o sea toda la data sin el fold Ti.
-        S_i = getSampleWithoutFold(i,s,fold_size,k) 
-        #Se entrena con el conjunto S_i
-        tree = genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
-        #Se obtiene el subconjunto que no se uso para entrenar.
-        T_i = getFold(i,s,fold_size)
-        e_i = sampleError(tree,attrs,targetAttr,T_i)
-        print "Error estimado del subconjunto T_" + str(i) + " = " + str(e_i)
-        e_aux += e_i
-    e = (1.0/k) * e_aux
-    print "El error estimado obtenido mediante validacion cruzada es "  + str(e)
-    
-# main()
 #testExample()
-crossValidation()
+#Ejecutar parte A
+# main()
+parteA()
+#Ejecutar parte B
+parteB()
 # testExample()
