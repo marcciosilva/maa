@@ -81,7 +81,7 @@ def parteB(maxHeight):
     print "El error obtenido mediante validacion cruzada es "  + str(e) + " en promedio"
     #Constante de intervalo de confianza para un 95% de confianza.
     constanteIntervaloConfianza = 1.96
-    diferencia = constanteIntervaloConfianza * math.sqrt((e * (1.0 - e)) / k)
+    diferencia = constanteIntervaloConfianza * math.sqrt((e * (1.0 - e)) / fold_size)
     print "Un intervalo de confianza del 95% para el error calculado es " + str((e - diferencia, e + diferencia))
     return e
 
@@ -171,9 +171,9 @@ def informationGain(attributes, data, attr, targetAttr):
  
     return (entropy(attributes, data, targetAttr) - attrEntropy)
  
- '''
- Obtiene el atributo que aporta mas information gain.
- '''
+'''
+Obtiene el atributo que aporta mas information gain.
+'''
 def getBestAttr(data, attributes, target):
     best = attributes[0]
     maxGain = 0;
@@ -321,22 +321,18 @@ el entrenamiento.
 '''
 def error(tree,attrs,targetAttr,validation_set):
     tmpAttrs = attrs[:-1]
+    e_aux = 0
     for instance in validation_set:
         #Valor asignado por hipotesis obtenida mediante entrenamiento.
         h_x = float(evalInstance(instance, tmpAttrs, tree))
         #Valor asignado por funcion objetivo.
         f_x = float(instance[attrs.index(targetAttr)])
         if (h_x != f_x):
-            e_x = 0.0
-        else:
             e_x = 1.0
-        #Si la variable de la sumatoria no esta asignada, se la
-        #define.
-        try:
-            e_aux += e_x
-        except NameError:
-            e_aux = e_x
-        e_aux = e_aux + e_x
+        else:
+            e_x = 0.0
+        e_aux += e_x
+
     return (1.0/len(validation_set)*e_aux)
 
 main()
