@@ -30,7 +30,7 @@ def main():
     # testExample()
 
 def testExample():
-	#Prueba utilizando ejemplo del capitulo 3 del Mitchell.
+    #Prueba utilizando ejemplo del capitulo 3 del Mitchell.
     attrs = ['Outlook', 'Temperature', 'Humidity', 'Wind', 'PlayTennis']
     data = np.array([
         ["Sunny", "Hot", "High", "Weak", "No"], 
@@ -57,8 +57,8 @@ def testExample():
     print tree
     tmpAttrs = attrs[:-1]
     for instance in data:
-    	tmpInstance = instance[:-1]
-    	evalInstance(tmpInstance, tmpAttrs, tree)
+        tmpInstance = instance[:-1]
+        evalInstance(tmpInstance, tmpAttrs, tree)
     treePrinting.printTree(tree)
     
 #Retorna la entropia de un conjunto de datos para un determinado atributo objetivo.
@@ -190,39 +190,39 @@ def genDecisionTree(data, attributes, target,maxHeight,currentHeight):
         #Llamada recursiva.
         subtree = genDecisionTree(valSubset, newAttr, target, maxHeight, currentHeight)
     
-    	#Agrego el subarbol al nodo actual.
+        #Agrego el subarbol al nodo actual.
         tree[(bestAttr,bestAttrMostCommonValue)][val] = subtree
     
     return tree
 
 #Clasifica una instancia de acuerdo a un arbol de decision.
 def evalInstance(instance, attributes, decisionTree):
-	#Obtengo nodo.
-	node = decisionTree.keys()[0]
-	#Obtengo indice del atributo en el arreglo de atributos posibles.
-	index = attributes.index(node[0])
-	#Si el valor del atributo de interes no es contemplado por el arbol,
-	#se lo intercambia por el valor mas comun para ese atributo.
+    #Obtengo nodo.
+    node = decisionTree.keys()[0]
+    #Obtengo indice del atributo en el arreglo de atributos posibles.
+    index = attributes.index(node[0])
+    #Si el valor del atributo de interes no es contemplado por el arbol,
+    #se lo intercambia por el valor mas comun para ese atributo.
 
-	attributeValue = instance[index]
-	#Si no es una etiqueta soportada.
-	if (not attributeValue in decisionTree[node].keys()):
-		# print decisionTree[node].keys()
-		# print "Tree node is " + str(node)
-		#Valor mas comun asociado en construccion.
-		# print "Unknown value " + "(" + attributeValue + ")" + " at node " + node[0]
-		attributeValue = node[1]
-		# print "Just assigned " + attributeValue + " to it"
-	#De otra manera, simplemente sigo la rama que corresponda con
-	#el valor original del atributo para la instancia.
-	nextBranchOrValue = decisionTree[node][attributeValue]
-	#Si estoy frente a una nueva rama, me sigo moviendo en ella
-	if (isinstance(nextBranchOrValue,dict)):
-		return evalInstance(instance, attributes, nextBranchOrValue)
-	#De otra manera, devuelvo la clasificacion obtenida.
-	else:
-		# print str(instance) + " classifies as " + nextBranchOrValue
-		return nextBranchOrValue
+    attributeValue = instance[index]
+    #Si no es una etiqueta soportada.
+    if (not attributeValue in decisionTree[node].keys()):
+        # print decisionTree[node].keys()
+        # print "Tree node is " + str(node)
+        #Valor mas comun asociado en construccion.
+        # print "Unknown value " + "(" + attributeValue + ")" + " at node " + node[0]
+        attributeValue = node[1]
+        # print "Just assigned " + attributeValue + " to it"
+    #De otra manera, simplemente sigo la rama que corresponda con
+    #el valor original del atributo para la instancia.
+    nextBranchOrValue = decisionTree[node][attributeValue]
+    #Si estoy frente a una nueva rama, me sigo moviendo en ella
+    if (isinstance(nextBranchOrValue,dict)):
+        return evalInstance(instance, attributes, nextBranchOrValue)
+    #De otra manera, devuelvo la clasificacion obtenida.
+    else:
+        # print str(instance) + " classifies as " + nextBranchOrValue
+        return nextBranchOrValue
 
 #def crossValidation(data, attributes,k):
    
@@ -233,40 +233,49 @@ def getFold(i,data,fold_size):
 def getSampleWithoutFold(i,data,fold_size,k):
     return np.concatenate((data[0:(i-1)*fold_size,:],data[i*fold_size:k*fold_size,:]))
 
-def error(tree,attrs,targetAttr,T_i):
+'''
+Funcion que evalua el sample error cometido al intentar clasificar las instancias
+del conjunto T_i, no tomado en cuenta para realizar el entrenamiento.
+'''
+def sampleError(tree,attrs,targetAttr,T_i):
     #falta terminar
     tmpAttrs = attrs[:-1]
     for instance in T_i:
-        tmpInstance = instance[:-1]
-        h_x = float(evalInstance(tmpInstance, tmpAttrs, tree))
-        f_x = float(tmpInstance[attrs.index(targetAttr) - 1])
-        e_x = f_x - h_x
+        #Valor asignado por hipotesis obtenida mediante entrenamiento.
+        h_x = float(evalInstance(instance, tmpAttrs, tree))
+        #Valor asignado por funcion objetivo.
+        f_x = float(instance[attrs.index(targetAttr)])
+        if (h_x != f_x):
+            e_x = 0.0
+        else:
+            e_x = 1.0
+        #Si la variable de la sumatoria no esta asignada, se la
+        #define.
         try:
-        	e_aux += e_x
+            e_aux += e_x
         except NameError:
-        	e_aux = e_x
+            e_aux = e_x
         e_aux = e_aux + e_x
-    return (1/len(T_i)*e_aux)
-    # return 0
+    return (1.0/len(T_i)*e_aux)
 
 def crossValidation():
+    print "### Parte B ###"
     fileName = "data/student-mat.csv"
     csvData = reader.getDataFromCsv(fileName)
     attrs, data = csvData[0], np.array(csvData[1])
-    print "Attributes " + str(attrs)
+    # print "Atributos : " + str(attrs)
     #Obtengo el resto de los datos.
     fileName = "data/student-por.csv"
     csvData = reader.getDataFromCsv(fileName)
     #Agrego nueva data a la anterior.
     data = np.concatenate((data, csvData[1]))
-
     k = 10
     data_size = len(data)
     s_size = data_size * 4/5
-    print "Total data size is " + str(data_size)
-    print "Sample size for cross validation is " + str(s_size)
+    print "Cantidad total de instancias en D : " + str(data_size)
+    print "Size de muestra para validacion cruzada : " + str(s_size)
     fold_size  = s_size / k
-    print "Fold size is " + str(fold_size)
+    print "Size de cada subconjunto T_i : " + str(fold_size)
     s = data[:s_size,:]
     #print s
     #T1
@@ -284,14 +293,17 @@ def crossValidation():
     i = 1
     e_aux = 0.0
     for i in range(1,k+1):
+        #Se obtiene el conjunto (S_i-Ti), o sea toda la data sin el fold Ti.
         S_i = getSampleWithoutFold(i,s,fold_size,k) 
+        #Se entrena con el conjunto S_i
         tree = genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
-        # treePrinting.printTree(tree)
+        #Se obtiene el subconjunto que no se uso para entrenar.
         T_i = getFold(i,s,fold_size)
-        e_i = error(tree,attrs,targetAttr,T_i)
+        e_i = sampleError(tree,attrs,targetAttr,T_i)
+        print "Error estimado del subconjunto T_" + str(i) + " = " + str(e_i)
         e_aux += e_i
     e = (1.0/k) * e_aux
-    print "e = " + str(e)
+    print "El error estimado obtenido mediante validacion cruzada es "  + str(e)
     
 # main()
 #testExample()
