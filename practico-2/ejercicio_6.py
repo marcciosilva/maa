@@ -3,6 +3,11 @@ import math
 import reader
 #import treePrinting
 
+def main():
+	parteA()
+	parteB()
+	parteC()
+
 def parteA():
     print "### Parte A ###"
     #Obtengo el conjunto completo de datos de prueba.
@@ -30,7 +35,6 @@ def parteB():
     fileName = "data/student-mat.csv"
     csvData = reader.getDataFromCsv(fileName)
     attrs, data = csvData[0], np.array(csvData[1])
-    # print "Atributos : " + str(attrs)
     #Obtengo el resto de los datos.
     fileName = "data/student-por.csv"
     csvData = reader.getDataFromCsv(fileName)
@@ -44,17 +48,6 @@ def parteB():
     fold_size  = s_size / k
     print "Size de cada subconjunto T_i : " + str(fold_size)
     s = data[:s_size,:]
-    #print s
-    #T1
-    #fold = getFold(1,s,fold_size)
-    #fold = data[1*fold_size:2*fold_size,:]
-    #print 'T1'
-    #print fold
-    #D-T1
-    #s_fold = getSampleWithoutFold(1,s,fold_size,k)
-    #s_fold = np.concatenate((data[0*fold_size:1*fold_size,:],data[2*fold_size:k*fold_size,:]))
-    #print 'D-T1'
-    #print s_fold
     maxHeight = 7
     targetAttr = 'G3'
     i = 1
@@ -77,6 +70,45 @@ def parteB():
     constanteIntervaloConfianza = 1.96
     diferencia = constanteIntervaloConfianza * math.sqrt((e * (1.0 - e)) / k)
     print "Un intervalo de confianza del 95% para el error calculado es " + str((e - diferencia, e + diferencia))
+
+def parteC():
+    print "### Parte C ###"
+    fileName = "data/student-mat.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    attrs, data = csvData[0], np.array(csvData[1])
+    #Obtengo el resto de los datos.
+    fileName = "data/student-por.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    #Agrego nueva data a la anterior.
+    data = np.concatenate((data, csvData[1]))
+    k = 10
+    data_size = len(data)
+    training_set_size = data_size * 4/5
+    print "Cantidad total de instancias en D : " + str(data_size)
+    validation_set_size = -(data_size - training_set_size)
+    print "Size de muestra para validacion : " + str(abs(validation_set_size))
+    #Ultimo quinto de la data.
+    validation_set = data[validation_set_size:,:]
+    print len(validation_set)
+    training_set = data[:training_set_size,:]
+    print len(training_set)
+    #Se limita altura maxima.
+    maxHeight = 7
+    # maxHeight = 31
+    tree = genDecisionTree(training_set, attrs, 'G3',maxHeight,0)
+    #Se imprime arbol a archivo de texto
+    f = open('out/arbol-parte-c.txt', 'w')
+    f.write(str(tree))
+    f.close()
+    print "Arbol exportado a out/arbol-parte-c.txt"
+    #Imprime arbol exportable a pdf.
+    # treePrinting.printTree(tree)
+    #Evaluo el validation_set con este arbol generado.
+    targetAttr = 'G3'
+    print sampleError(tree, attrs, targetAttr, validation_set)
+
+
+
 
 #Retorna la entropia de un conjunto de datos para un determinado atributo objetivo.
 def entropy(attributes, data, targetAttr):
@@ -252,12 +284,12 @@ def getSampleWithoutFold(i,data,fold_size,k):
 
 '''
 Funcion que evalua el sample error cometido al intentar clasificar las instancias
-del conjunto T_i, no tomado en cuenta para realizar el entrenamiento.
+del conjunto de validacion pasado por parametro, no tomado en cuenta para realizar 
+el entrenamiento.
 '''
-def sampleError(tree,attrs,targetAttr,T_i):
-    #falta terminar
+def sampleError(tree,attrs,targetAttr,validation_set):
     tmpAttrs = attrs[:-1]
-    for instance in T_i:
+    for instance in validation_set:
         #Valor asignado por hipotesis obtenida mediante entrenamiento.
         h_x = float(evalInstance(instance, tmpAttrs, tree))
         #Valor asignado por funcion objetivo.
@@ -273,12 +305,6 @@ def sampleError(tree,attrs,targetAttr,T_i):
         except NameError:
             e_aux = e_x
         e_aux = e_aux + e_x
-    return (1.0/len(T_i)*e_aux)
+    return (1.0/len(validation_set)*e_aux)
 
-#testExample()
-#Ejecutar parte A
-# main()
-parteA()
-#Ejecutar parte B
-parteB()
-# testExample()
+main()
