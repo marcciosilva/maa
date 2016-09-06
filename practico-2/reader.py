@@ -5,8 +5,6 @@ def getDataFromCsv(fileName):
 	rawData = []
 	for row in csv_reader:
 	    rawData.append(row)
-	attrs = rawData[0] #head
-	data = rawData[1:] #tail
-	# print "attributes : " + str(attrs)
-	# print "data : " + str(data)
+	attrs = rawData[0]
+	data = rawData[1:]
 	return (attrs, data)
