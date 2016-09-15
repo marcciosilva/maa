@@ -24,10 +24,9 @@ def main():
 	for x in range(s_size,data_size):
 		instancia = data[x,:]
 		aux += clasificadorNB(instancia,attrs,sample,targetAttr)
-		print "----------------------------------------------------------------   " + str(aux)
-	print data_size - s_size
+		print "----------------------------------------------------------------"
+	#print data_size - s_size
 	acierto = round(100.00 * aux / (data_size - s_size),2)
-	print acierto
 	print "Se acierta en un: " + str(acierto) + "%"
 
 def clasificadorNB(instancia,attrs,sample,targetAttr):
@@ -52,7 +51,6 @@ def clasificadorNB(instancia,attrs,sample,targetAttr):
 		for a in range(len(attrsSinNotas)):
 			if (instancia[a] == sample[j,a]):
 				m[nota,a] += 1
-	#print m
 	maximo = 0
 	notaRes = 0
 	for i in range(21):
@@ -69,28 +67,12 @@ def clasificadorNB(instancia,attrs,sample,targetAttr):
 
 	total = sum(result)
 	porcent = round((maximo / total * 100),2)
-	#print m
-	#print "-------------------------"
-	#print result
-	#print "-------------------------"
-	#print maximo
-	#print "-------------------------"
-	#print total
-	#print "-------------------------"
-	#print notaRes
-	#print "-------------------------"
-	#print round((maximo / total * 100),2)
 
 	print "Con un " + str(porcent) + "%" + " de seguridad puedo afirmar que la nota final es: " + str(notaRes) + "."
 	if (int(instancia[attrs.index(targetAttr)]) == notaRes):
-		print 111111111111111
 		return 1
 	else:
 		return 0
-	#print str(p)
-	#aux = 0
-	#for pi in p:
-	#	aux += pi
-	#print aux
+
 
 main()
