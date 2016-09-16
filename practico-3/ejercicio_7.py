@@ -29,7 +29,7 @@ def main():
 		aux += clasificadorNB(instancia,attrs,sample,targetAttr)
 		print "----------------------------------------------------------------"
 	acierto = round(100.00 * aux / (data_size - s_size),2)
-	print "Aciertos = " + str(aux) + " de " + str(s_size) + " (" + str(acierto) + "%)"
+	print "Aciertos = " + str(aux) + " de " + str(data_size - s_size) + " (" + str(acierto) + "%)"
 
 def clasificadorNB(instancia,attrs,sample,targetAttr):
 	print "### clasificador NB ###"
