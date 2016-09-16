@@ -15,6 +15,8 @@ def main():
 	data = np.concatenate((data, csvData[1]))
 	targetAttr = 'G3'
 	data_size = len(data)
+	#Desordeno instancias
+	data = np.random.permutation(data)
 	s_size = data_size * 4/5
 	print "Cantidad total de instancias en D : " + str(data_size)
 	print "Size de muestra para entrenar NB : " + str(s_size)
