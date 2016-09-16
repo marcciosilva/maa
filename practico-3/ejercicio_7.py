@@ -2,7 +2,6 @@ import numpy as np
 import math
 import reader
 import sys
-#import treePrinting
 
 def main():
 
@@ -20,55 +19,70 @@ def main():
 	print "Cantidad total de instancias en D : " + str(data_size)
 	print "Size de muestra para entrenar NB : " + str(s_size)
 	sample = data[:s_size,:]
+	#Acumulador de aciertos.
 	aux = 0
 	for x in range(s_size,data_size):
 		instancia = data[x,:]
+		#Se suma 1 si fue un acierto, 0 en caso contrario.
 		aux += clasificadorNB(instancia,attrs,sample,targetAttr)
 		print "----------------------------------------------------------------"
-	#print data_size - s_size
 	acierto = round(100.00 * aux / (data_size - s_size),2)
-	print "Se acierta en un: " + str(acierto) + "%"
+	print "Aciertos = " + str(aux) + " de " + str(s_size) + " (" + str(acierto) + "%)"
 
 def clasificadorNB(instancia,attrs,sample,targetAttr):
 	print "### clasificador NB ###"
 	print "Clasificando instancia: " + str(instancia)
-	i = 0
-	j = 0
-	p = 21 * [0]
-	cantNota = 21 * [0]
+	#Como las notas van de 0 a 20, tenemos 21 posibles notas.
+	cantNotasPosibles = 21
+	#Genero arreglos de 21 ceros.
+	p = cantNotasPosibles * [0]
+	#Arreglo que almacena la cantidad de ocurrencias para cada nota,
+	#segun el sample (atributo G3).
+	cantNota = cantNotasPosibles * [0]
+	#Quito tres ultimos atributos porque no se utilizan al clasificar.
 	attrsSinNotas = attrs[:-3]
-	m = np.zeros((21, len(attrsSinNotas)))
-	result = 21 * [0]
-	aux = 21 * [1]
-	#print aux
-	#for i in range(21):
+	#Genero matriz de ceros de cantNotasPosibles * len(attrsSinNotas).
+	#Cada fila es una nota posible, cada columna un atributo posible.
+	#La idea es almacenar las ocurrencias de cada atributo para una
+	#clasificacion en particular.
+	m = np.zeros((cantNotasPosibles, len(attrsSinNotas)))
+	result = cantNotasPosibles * [0]
+	aux = cantNotasPosibles * [1]
 	for j in range(len(sample)):
-	#if (sample[j,attrs.index(targetAttr)] == str(i)):
-	#p[i] += 1
+		#Recabo cantidad de apariciones de cada nota segun la sample.
 		nota = int(sample[j,attrs.index(targetAttr)])
 		cantNota[nota] += 1
-		a = 0
 		for a in range(len(attrsSinNotas)):
 			if (instancia[a] == sample[j,a]):
 				m[nota,a] += 1
-	maximo = 0
+	print "###################################"
+	print "cantNota = " + str(cantNota)
+	print "###################################"
+	maximo = -sys.maxint - 1
+	#Clasificacion obtenida.
 	notaRes = 0
-	for i in range(21):
+	for i in range(cantNotasPosibles):
+		#Proporcion del valor de atributo i en el total de la muestra.
 		p[i] = cantNota[i] / float(len(sample))
-		x = 0
 		for x in range(len(attrsSinNotas)):
 			if cantNota[i] > 0:
+				#La celda que contenia la cantidad de ocurrencias del valor
+				#de atributo x con clasificacion i pasa a ser 
+				#la proporcion entre ese valor y la cantidad de veces que
+				#ocurre la nota i.
 				m[i,x] = m[i,x] / cantNota[i]
-			aux[i] = aux[i] * m[i,x]
+				aux[i] = aux[i] * m[i,x]
+			#En caso contrario el producto permanece incambiado porque
+			#no hay ocurrencias de esa nota en la muestra.
+			#Ademas, en dicho caso, p[i] ya es 0, por lo que de todas
+			#maneras el resultado se anula en la siguiente linea.
 		result[i] = aux[i] * p[i]
 		if (result[i] > maximo):
 			maximo = result[i]
 			notaRes = i
-
 	total = sum(result)
-	porcent = round((maximo / total * 100),2)
-
-	print "Con un " + str(porcent) + "%" + " de seguridad puedo afirmar que la nota final es: " + str(notaRes) + "."
+	porcentaje = round((maximo / total * 100),2)
+	print "Con un " + str(porcentaje) + "%" + " de seguridad puedo afirmar que la nota final es: " + str(notaRes) + "."
 	if (int(instancia[attrs.index(targetAttr)]) == notaRes):
 		return 1
 	else:
