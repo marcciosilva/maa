@@ -1,131 +1,6 @@
 import numpy as np
 import math
-import reader
 import sys
-import treePrinting
-
-def main():
-    maxHeight = 6
-    parteA(maxHeight)
-    # parteB(maxHeight)
-    # parteC(maxHeight)
-
-def overfittingTest():
-    erroresB = []
-    erroresC = []
-    for i in range(40):
-        erroresB.append(parteB(i))
-        erroresC.append(parteC(i))
-    print "Errores de parte B segun altura:"
-    for i in range(40):
-        print str((i, erroresB[i])) + " "
-    print "Errores de parte C segun altura:"
-    for i in range(40):
-        print str((i, erroresC[i])) + " "
-
-
-def parteA(maxHeight):
-    print "### Parte A ###"
-    #Obtengo el conjunto completo de datos de prueba.
-    fileName = "data/student-mat.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    attrs, data = csvData[0], np.array(csvData[1])
-    #Obtengo el resto de los datos.
-    fileName = "data/student-por.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    #Agrego nueva data a la anterior variable.
-    data = np.concatenate((data, csvData[1]))
-    #Elimino columnas G1 y G2 para no tomarlos en cuenta
-    #para la generacion del arbol de decision.
-    attrs = np.delete(attrs, np.s_[30:32], axis=0).tolist()
-    data = np.delete(data, np.s_[30:32], axis=1)
-    #Se determina altura maxima.
-    tree = genDecisionTree(data, attrs, 'G3',maxHeight,0)
-    # #Se imprime arbol a archivo de texto
-    # f = open('out/arbol-parte-a.txt', 'w')
-    # f.write(str(tree))
-    # f.close()
-    # print "Arbol exportado a out/arbol-parte-a.txt"
-    #Imprime arbol exportable a pdf.
-    treePrinting.printTree(tree)
-
-def parteB(maxHeight):
-    print "### Parte B ###"
-    fileName = "data/student-mat.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    attrs, data = csvData[0], np.array(csvData[1])
-    #Obtengo el resto de los datos.
-    fileName = "data/student-por.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    #Agrego nueva data a la anterior.
-    data = np.concatenate((data, csvData[1]))
-    k = 10
-    data_size = len(data)
-    s_size = data_size * 4/5
-    print "Cantidad total de instancias en D : " + str(data_size)
-    print "Size de muestra para validacion cruzada : " + str(s_size)
-    fold_size  = s_size / k
-    print "Size de cada subconjunto T_i : " + str(fold_size)
-    s = data[:s_size,:]
-    targetAttr = 'G3'
-    i = 1
-    e_aux = 0.0
-    for i in range(1,k+1):
-        #Se obtiene el conjunto (S_i-Ti), o sea toda la data sin el fold Ti.
-        S_i = getSampleWithoutFold(i,s,fold_size,k) 
-        #Se entrena con el conjunto S_i
-        tree = genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
-        #Se obtiene el subconjunto que no se uso para entrenar.
-        T_i = getFold(i,s,fold_size)
-        e_i = error(tree,attrs,targetAttr,T_i)
-        print "Error del arbol generado, validando con el subconjunto T_" + str(i) + " = " + str(e_i)
-        e_aux += e_i
-    #Promedio de errores estimados para cada subconjunto.
-    e = (1.0/k) * e_aux
-    print "El error obtenido mediante validacion cruzada es "  + str(e) + " en promedio"
-    #Constante de intervalo de confianza para un 95% de confianza.
-    constanteIntervaloConfianza = 1.96
-    diferencia = constanteIntervaloConfianza * math.sqrt((e * (1.0 - e)) / fold_size)
-    print "Un intervalo de confianza del 95% para el error calculado es " + str((e - diferencia, e + diferencia))
-    return e
-
-def parteC(maxHeight):
-    print "### Parte C ###"
-    fileName = "data/student-mat.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    attrs, data = csvData[0], np.array(csvData[1])
-    #Obtengo el resto de los datos.
-    fileName = "data/student-por.csv"
-    csvData = reader.getDataFromCsv(fileName)
-    #Agrego nueva data a la anterior.
-    data = np.concatenate((data, csvData[1]))
-    data_size = len(data)
-    training_set_size = data_size * 4/5
-    print "Cantidad total de instancias en D : " + str(data_size)
-    validation_set_size = -(data_size - training_set_size)
-    print "Size de muestra para validacion : " + str(abs(validation_set_size))
-    #Ultimo quinto de la data.
-    validation_set = data[validation_set_size:,:]
-    training_set = data[:training_set_size,:]
-    #Se limita altura maxima.
-    # maxHeight = 31
-    tree = genDecisionTree(training_set, attrs, 'G3',maxHeight,0)
-    #Se imprime arbol a archivo de texto
-    f = open('out/arbol-parte-c.txt', 'w')
-    f.write(str(tree))
-    f.close()
-    print "Arbol exportado a out/arbol-parte-c.txt"
-    #Imprime arbol exportable a pdf.
-    treePrinting.printTree(tree)
-    #Evaluo el validation_set con este arbol generado.
-    targetAttr = 'G3'
-    e = error(tree, attrs, targetAttr, validation_set)
-    print "El error estimado obtenido es " + str(e)
-    #Constante de intervalo de confianza para un 95% de confianza.
-    constanteIntervaloConfianza = 1.96
-    diferencia = constanteIntervaloConfianza * math.sqrt((e * (1.0 - e)) / (-validation_set_size))
-    print "Un intervalo de confianza del 95% para el error calculado es " + str((e - diferencia, e + diferencia))
-    return e
 
 '''
 Retorna la entropia de un conjunto de datos para un determinado atributo objetivo.
@@ -245,7 +120,6 @@ def genDecisionTree(data, attributes, target,maxHeight,currentHeight):
 
 
     #Genero una rama.
-    # tree = {bestAttr:{}}
     #Cada nodo tendra su valor mas comun (de acuerdo a ejemplos de 
     #entrenamiento) asociado
     tree = {(bestAttr, bestAttrMostCommonValue):{}}
@@ -287,12 +161,8 @@ def evalInstance(instance, attributes, decisionTree):
         attributeValue = instance[index]
         #Si no es una etiqueta soportada.
         if (not attributeValue in decisionTree[node].keys()):
-            # print decisionTree[node].keys()
-            # print "Tree node is " + str(node)
             #Valor mas comun asociado en construccion.
-            # print "Unknown value " + "(" + attributeValue + ")" + " at node " + node[0]
             attributeValue = node[1]
-            # print "Just assigned " + attributeValue + " to it"
         #De otra manera, simplemente sigo la rama que corresponda con
         #el valor original del atributo para la instancia.
         nextBranchOrValue = decisionTree[node][attributeValue]
@@ -301,7 +171,6 @@ def evalInstance(instance, attributes, decisionTree):
             return evalInstance(instance, attributes, nextBranchOrValue)
         #De otra manera, devuelvo la clasificacion obtenida.
         else:
-            # print str(instance) + " classifies as " + nextBranchOrValue
             return nextBranchOrValue
     else:
         return sys.maxint
@@ -338,5 +207,3 @@ def error(tree,attrs,targetAttr,validation_set):
         e_aux += e_x
 
     return (1.0/len(validation_set)*e_aux)
-
-main()
