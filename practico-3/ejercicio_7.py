@@ -10,9 +10,6 @@ cantNotasPosibles = 21
 
 def main():
     #Acumuladores de aciertos.
-    auxNB = 0
-    auxKNN = 0
-    auxDT = 0
     porcentajeAciertosNB = []
     porcentajeAciertosKNN = []
     porcentajeAciertosDT = []
@@ -32,43 +29,43 @@ def main():
     attrs = np.delete(attrs, np.s_[30:32], axis=0).tolist()
     data = np.delete(data, np.s_[30:32], axis=1)
 
-    iteraciones = 10
+    iteraciones = 100
     for iteracion in range(iteraciones):
-	    #Desordeno instancias
-	    dataTmp = np.random.permutation(data)
-	    s_size = data_size * 4/5
-	    print "Cantidad total de instancias en D : " + str(data_size)
-	    print "Size de muestra para entrenar NB : " + str(s_size)
-	    sample = dataTmp[:s_size,:]
-	    #Genero arbol de decision.
-	    maxHeight = 2
-	    tree = decisionTrees.genDecisionTree(sample, attrs, 'G3',maxHeight,0)
-	    # treePrinting.printTree(tree)
-	    for x in range(s_size,data_size):
-	        instancia = dataTmp[x,:]
-	        #Se suma 1 si fue un acierto, 0 en caso contrario.
-	        auxNB += clasificadorNB(instancia,attrs,sample,targetAttr)
-	        auxKNN += clasificadorKNN(instancia,attrs,sample,targetAttr,3)
-	        auxDT += clasificadorDecisionTree(instancia,attrs,targetAttr,tree)
-	        print "----------------------------------------------------------------"
-	    acierto = round(100.00 * auxNB / (data_size - s_size),2)
-	    porcentajeAciertosNB.append(round(100.00 * auxNB / (data_size - s_size),2))
-	    porcentajeAciertosKNN.append(round(100.00 * auxKNN / (data_size - s_size),2))
-	    porcentajeAciertosDT.append(round(100.00 * auxDT / (data_size - s_size),2))
+        #Desordeno instancias
+        dataTmp = np.random.permutation(data)
+        s_size = data_size * 4/5
+        # print "Cantidad total de instancias en D : " + str(data_size)
+        # print "Size de muestra para entrenar NB : " + str(s_size)
+        sample = dataTmp[:s_size,:]
+        #Genero arbol de decision.
+        maxHeight = 2
+        tree = decisionTrees.genDecisionTree(sample, attrs, 'G3',maxHeight,0)
+        auxNB = 0
+        auxKNN = 0
+        auxDT = 0
+        for x in range(s_size,data_size):
+            instancia = dataTmp[x,:]
+            #Se suma 1 si fue un acierto, 0 en caso contrario.
+            auxNB += clasificadorNB(instancia,attrs,sample,targetAttr)
+            auxKNN += clasificadorKNN(instancia,attrs,sample,targetAttr,3)
+            auxDT += clasificadorDecisionTree(instancia,attrs,targetAttr,tree)
+            # print "----------------------------------------------------------------"
+        porcentajeAciertosNB.append(round(100.00 * auxNB / (data_size - s_size),2))
+        porcentajeAciertosKNN.append(round(100.00 * auxKNN / (data_size - s_size),2))
+        porcentajeAciertosDT.append(round(100.00 * auxDT / (data_size - s_size),2))
     print "Aciertos NB: "
     for i in range(len(porcentajeAciertosNB)):
-    	print "(" + str(i) + "," + str(porcentajeAciertosNB[i]) + ") "
+        print "(" + str(i) + "," + str(porcentajeAciertosNB[i]) + ") "
     print "Aciertos KNN: "
     for i in range(len(porcentajeAciertosKNN)):
-    	print "(" + str(i) + "," + str(porcentajeAciertosKNN[i]) + ") "    
+        print "(" + str(i) + "," + str(porcentajeAciertosKNN[i]) + ") "    
     print "Aciertos DT: "
     for i in range(len(porcentajeAciertosDT)):
-    	print "(" + str(i) + "," + str(porcentajeAciertosDT[i]) + ") "    
-    # print "Aciertos = " + str(auxNB) + " de " + str(data_size - s_size) + " (" + str(acierto) + "%)"
+        print "(" + str(i) + "," + str(porcentajeAciertosDT[i]) + ") "    
 
 def clasificadorNB(instancia,attrs,sample,targetAttr):
-    print "### clasificador NB ###"
-    print "Clasificando instancia: " + str(instancia)
+    # print "### clasificador NB ###"
+    # print "Clasificando instancia: " + str(instancia)
     #Genero arreglos de 21 ceros.
     p = cantNotasPosibles * [0]
     #Arreglo que almacena la cantidad de ocurrencias para cada nota,
@@ -114,9 +111,9 @@ def clasificadorNB(instancia,attrs,sample,targetAttr):
             notaRes = i
     total = sum(result)
 
-    print "maximo = " + str(maximo) + ", total = " + str(total)
+    # print "maximo = " + str(maximo) + ", total = " + str(total)
     porcentaje = round((maximo / total * 100.0),2)
-    print "Con un " + str(porcentaje) + "%" + " de seguridad puedo afirmar que la nota final es: " + str(notaRes) + "."
+    # print "Con un " + str(porcentaje) + "%" + " de seguridad puedo afirmar que la nota final es: " + str(notaRes) + "."
     if (int(instancia[attrs.index(targetAttr)]) == notaRes):
         return 1
     else:
@@ -188,8 +185,8 @@ def distInstances(fstInstance, sndInstance, attrTypes):
     return result
 
 def clasificadorKNN(instancia,attrs,sample,targetAttr,k):
-    print "### clasificador KNN ###"
-    print "Clasificando instancia: " + str(instancia)
+    # print "### clasificador KNN ###"
+    # print "Clasificando instancia: " + str(instancia)
     #Copia local de sample.
     sampleCopy = np.empty_like(sample)
     sampleCopy[:] = sample
@@ -223,8 +220,8 @@ def clasificadorKNN(instancia,attrs,sample,targetAttr,k):
                 chosenInstance = instance
         #Instancia encontrada.
         if (len(chosenInstance) > 0):
-            print "dist for k:" + str(i) + " = " + str(minDist)
-            print "clasificacion para instancia cercana: " + str(chosenInstance[-1])
+            # print "dist for k:" + str(i) + " = " + str(minDist)
+            # print "clasificacion para instancia cercana: " + str(chosenInstance[-1])
             instanciasCercanas.append(chosenInstance)
             # del distances[chosenInstance]
 
@@ -258,7 +255,7 @@ def clasificadorKNN(instancia,attrs,sample,targetAttr,k):
             sumatoria = tmpSumatoria
             clasificacion = clasificacionPosible
         clasificacionPosible += 1
-    print "La clasificacion asignada es " + str(clasificacion) + "."
+    # print "La clasificacion asignada es " + str(clasificacion) + "."
     if (int(instancia[attrs.index(targetAttr)]) == clasificacion):
         return 1
     else:
@@ -266,23 +263,10 @@ def clasificadorKNN(instancia,attrs,sample,targetAttr,k):
 
 def clasificadorDecisionTree(instancia,attrs,targetAttr,tree):
     clasificacion = decisionTrees.evalInstance(instancia, attrs, tree)
-    print "La clasificacion asignada es " + str(clasificacion) + "."
+    # print "La clasificacion asignada es " + str(clasificacion) + "."
     if (int(instancia[attrs.index(targetAttr)]) == int(clasificacion)):
         return 1
     else:
         return 0    
-
-def distTest():
-    print distAttrValues("age", 15, 17)
-    print distAttrValues("Fedu", 0, 4)
-    print distAttrValues("Mjob", "teacher", "at_home")
-    print distAttrValues("school", "GP", "MS")
-    print distAttrValues("school", "GP", "GP")
-    print distInstances (['GP', 'F', '18', 'U', 'GT3', 'T', '2', '1', 'other', 'other', 'home', 'mother', '1', '2', '0', 'no', 'yes', 'no', 'no', 'yes', 'yes', 'yes', 'yes', '4', '2', '5', '1', '2', '1', '8', '14', '14', '15'],
-        ['GP', 'F', '18', 'U', 'GT3', 'T', '2', '1', 'other', 'other', 'home', 'mother', '1', '2', '0', 'yes', 'yes', 'no', 'no', 'yes', 'yes', 'yes', 'yes', '4', '2', '5', '1', '2', '1', '8', '14', '14', '15'],
-        ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3'])
-    print distInstances (['GP', 'F', '18', 'U', 'GT3', 'T', '2', '1', 'other', 'other', 'home', 'mother', '1', '2', '0', 'no', 'yes', 'no', 'no', 'yes', 'yes', 'yes', 'yes', '4', '2', '5', '1', '2', '1', '8', '14', '14', '15'],
-        ['GP', 'M', '15', 'U', 'LE3', 'T', '2', '1', 'other', 'other', 'home', 'mother', '1', '2', '0', 'no', 'no', 'no', 'no', 'no', 'no', 'yes', 'yes', '4', '2', '5', '1', '2', '1', '8', '14', '14', '15'],
-        ['school', 'sex', 'age', 'address', 'famsize', 'Pstatus', 'Medu', 'Fedu', 'Mjob', 'Fjob', 'reason', 'guardian', 'traveltime', 'studytime', 'failures', 'schoolsup', 'famsup', 'paid', 'activities', 'nursery', 'higher', 'internet', 'romantic', 'famrel', 'freetime', 'goout', 'Dalc', 'Walc', 'health', 'absences', 'G1', 'G2', 'G3'])    
 
 main()
