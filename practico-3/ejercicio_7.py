@@ -29,8 +29,9 @@ def main():
     attrs = np.delete(attrs, np.s_[30:32], axis=0).tolist()
     data = np.delete(data, np.s_[30:32], axis=1)
 
-    iteraciones = 100
-    for iteracion in range(iteraciones):
+    startRange = 0
+    endRange = 10
+    for iteracion in range(startRange,endRange):
         #Desordeno instancias
         dataTmp = np.random.permutation(data)
         s_size = data_size * 4/5
@@ -55,13 +56,15 @@ def main():
         porcentajeAciertosDT.append(round(100.00 * auxDT / (data_size - s_size),2))
     print "Aciertos NB: "
     for i in range(len(porcentajeAciertosNB)):
-        print "(" + str(i) + "," + str(porcentajeAciertosNB[i]) + ") "
+        print "(" + str(i + startRange) + "," + str(porcentajeAciertosNB[i]) + ") "
+    print ""
     print "Aciertos KNN: "
     for i in range(len(porcentajeAciertosKNN)):
-        print "(" + str(i) + "," + str(porcentajeAciertosKNN[i]) + ") "    
+        print "(" + str(i + startRange) + "," + str(porcentajeAciertosKNN[i]) + ") "    
+    print ""
     print "Aciertos DT: "
     for i in range(len(porcentajeAciertosDT)):
-        print "(" + str(i) + "," + str(porcentajeAciertosDT[i]) + ") "    
+        print "(" + str(i + startRange) + "," + str(porcentajeAciertosDT[i]) + ") "    
 
 def clasificadorNB(instancia,attrs,sample,targetAttr):
     # print "### clasificador NB ###"
