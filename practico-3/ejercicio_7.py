@@ -4,15 +4,165 @@ import reader
 import sys
 import decisionTrees
 import treePrinting
+import atexit
+from random import randint
+from time import clock
 
+def secondsToStr(t):
+    return "%d:%02d:%02d.%03d" % \
+        reduce(lambda ll,b : divmod(ll[0],b) + ll[1:],
+            [(t*1000,),1000,60,60])
+
+line = "="*40
+def log(s, elapsed=None):
+    print line
+    print secondsToStr(clock()), '-', s
+    if elapsed:
+        print "Elapsed time:", elapsed
+    print line
+    print
+
+def endlog():
+    end = clock()
+    elapsed = end-start
+    log("End Program", secondsToStr(elapsed))
+
+def now():
+    return secondsToStr(clock())
+
+start = clock()
+atexit.register(endlog)
+log("Start Program")
 #Como las notas van de 0 a 20, tenemos 21 posibles notas.
 cantNotasPosibles = 21
 
-def main():
+#Comparacion basada en seccion 5.6 del Mitchell.
+def comparacionAlgoritmos():
+    #Manejo de data.
+    fileName = "data/student-mat.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    attrs, data = csvData[0], np.array(csvData[1])
+    #Obtengo el resto de los datos.
+    fileName = "data/student-por.csv"
+    csvData = reader.getDataFromCsv(fileName)
+    #Agrego nueva data a la anterior.
+    data = np.concatenate((data, csvData[1]))
+    targetAttr = 'G3'
+    data_size = len(data)
+    #Elimino columnas G1 y G2 para no tomarlos en cuenta
+    #para la generacion del arbol de decision.
+    attrs = np.delete(attrs, np.s_[30:32], axis=0).tolist()
+    data = np.delete(data, np.s_[30:32], axis=1)
+    iteraciones = 25
+    #Listas para acumular estimacion de diferencia de errores
+    #entre algoritmos.
+    diff_NB_KNN1 = iteraciones * [0]
+    diff_NB_KNN3 = iteraciones * [0]
+    diff_NB_DT = iteraciones * [0]
+    diff_KNN1_KNN3 = iteraciones * [0]
+    diff_KNN1_DT = iteraciones * [0]
+    diff_KNN3_DT = iteraciones * [0]
+    k = 10
+    training_set_size = data_size * 4/5
+    print "Cantidad total de instancias en D : " + str(data_size)
+    print "Size de muestra para entrenamiento con metodos de aprendizaje : " + str(training_set_size)
+    #Tamanio de conjunto de validacion
+    validation_set_size  = data_size - training_set_size
+    print "Size de cada subconjunto de validacion : " + str(validation_set_size)
+    for iteracion in range(iteraciones):
+        print "##########################################################"
+        print "Iteracion " + str(iteracion + 1)
+        print "##########################################################"
+        #Desordeno instancias
+        data = np.random.permutation(data)
+        #Listas para acumular sample errors.
+        erroresSampleNB = k * [0]
+        erroresSampleKNN1 = k * [0]
+        erroresSampleKNN3 = k * [0]
+        erroresSampleDT = k * [0]
+        for i in range(1,k+1):
+            #Se obtiene el conjunto (S_i-Ti), o sea toda la data sin el fold Ti.
+            S_i = decisionTrees.getSampleWithoutFold(i,data,validation_set_size,k) 
+            #Se entrena con el conjunto S_i
+            # tree = genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
+            # #Se obtiene el subconjunto que no se uso para entrenar.
+            validation_set = decisionTrees.getFold(i,data,validation_set_size)
+            #Genero arbol de decision.
+            maxHeight = 6
+            tree = decisionTrees.genDecisionTree(S_i, attrs, 'G3',maxHeight,0)
+            auxNB = 0
+            auxKNN_1 = 0
+            auxKNN_3 = 0
+            auxDT = 0
+            for validationInstance in validation_set:
+                #Se suma 1 si fue un acierto, 0 en caso contrario.
+                auxNB += clasificadorNB(validationInstance,attrs,S_i,targetAttr)
+                auxKNN_1 += clasificadorKNN(validationInstance,attrs,S_i,targetAttr,1)
+                auxKNN_3 += clasificadorKNN(validationInstance,attrs,S_i,targetAttr,3)
+                auxDT += clasificadorDecisionTree(validationInstance,attrs,targetAttr,tree)
+            #Calculo error de sample para cada algoritmo.
+            #validation_set_size - auxX va a ser la cantidad de errores de cada algoritmo.
+            erroresSampleNB[i-1] = (1.0/validation_set_size*(validation_set_size - auxNB))
+            erroresSampleKNN1[i-1] = (1.0/validation_set_size*(validation_set_size - auxKNN_1))
+            erroresSampleKNN3[i-1] = (1.0/validation_set_size*(validation_set_size - auxKNN_3))
+            erroresSampleDT[i-1] = (1.0/validation_set_size*(validation_set_size - auxDT))
+        #Ya tengo los sample errors para cada metodo, para todo set de validacion.
+        #Error estimado entre NB y KNN1
+        sum_aux = 0
+        for i in range(k):
+            sum_aux += erroresSampleNB[i] - erroresSampleKNN1[i]
+        errorEstimado = (1.0/k) * sum_aux
+        diff_NB_KNN1[iteracion] = errorEstimado
+        print "Estimacion de diferencia en error entre NB y KNN1 = " + str(errorEstimado)
+        #Error estimado entre NB y KNN3
+        sum_aux = 0
+        for i in range(k):
+            sum_aux += erroresSampleNB[i] - erroresSampleKNN3[i]
+        errorEstimado = (1.0/k) * sum_aux
+        diff_NB_KNN3[iteracion] = errorEstimado
+        print "Estimacion de diferencia en error entre NB y KNN3 = " + str(errorEstimado)    
+        #Error estimado entre NB y DT
+        sum_aux = 0
+        for i in range(k):
+            sum_aux += erroresSampleNB[i] - erroresSampleDT[i]
+        errorEstimado = (1.0/k) * sum_aux
+        diff_NB_DT[iteracion] = errorEstimado
+        print "Estimacion de diferencia en error entre NB y DT = " + str(errorEstimado)    
+        #Error estimado entre KNN1 y KNN3
+        sum_aux = 0
+        for i in range(k):
+            sum_aux += erroresSampleKNN1[i] - erroresSampleKNN3[i]
+        errorEstimado = (1.0/k) * sum_aux
+        diff_KNN1_KNN3[iteracion] = errorEstimado
+        print "Estimacion de diferencia en error entre KNN1 y KNN3 = " + str(errorEstimado)    
+        #Error estimado entre KNN1 y DT
+        sum_aux = 0
+        for i in range(k):
+            sum_aux += erroresSampleKNN1[i] - erroresSampleDT[i]
+        errorEstimado = (1.0/k) * sum_aux
+        diff_KNN1_DT[iteracion] = errorEstimado
+        print "Estimacion de diferencia en error entre KNN1 y DT = " + str(errorEstimado)    
+        #Error estimado entre KNN3 y DT
+        sum_aux = 0
+        for i in range(k):
+            sum_aux += erroresSampleKNN3[i] - erroresSampleDT[i]
+        errorEstimado = (1.0/k) * sum_aux
+        diff_KNN3_DT[iteracion] = errorEstimado
+        print "Estimacion de diferencia en error entre KNN3 y DT = " + str(errorEstimado)    
+    print "diff_NB_KNN1: " + str(diff_NB_KNN1)
+    print "diff_NB_KNN3: " + str(diff_NB_KNN3)
+    print "diff_NB_DT: " + str(diff_NB_DT)
+    print "diff_KNN1_KNN3: " + str(diff_KNN1_KNN3)
+    print "diff_KNN1_DT: " + str(diff_KNN1_DT)
+    print "diff_KNN3_DT: " + str(diff_KNN3_DT)
+
+def testAciertos(startRange, endRange):
     #Acumuladores de aciertos.
     porcentajeAciertosNB = []
-    porcentajeAciertosKNN = []
+    porcentajeAciertosKNN1 = []
+    porcentajeAciertosKNN3 = []
     porcentajeAciertosDT = []
+    porcentajeAciertosRandom = []
     #Manejo de data.
     fileName = "data/student-mat.csv"
     csvData = reader.getDataFromCsv(fileName)
@@ -29,8 +179,6 @@ def main():
     attrs = np.delete(attrs, np.s_[30:32], axis=0).tolist()
     data = np.delete(data, np.s_[30:32], axis=1)
 
-    startRange = 0
-    endRange = 10
     for iteracion in range(startRange,endRange):
         #Desordeno instancias
         dataTmp = np.random.permutation(data)
@@ -42,29 +190,46 @@ def main():
         maxHeight = 2
         tree = decisionTrees.genDecisionTree(sample, attrs, 'G3',maxHeight,0)
         auxNB = 0
-        auxKNN = 0
+        auxKNN1 = 0
+        auxKNN3 = 0
         auxDT = 0
+        auxRandom = 0
         for x in range(s_size,data_size):
             instancia = dataTmp[x,:]
             #Se suma 1 si fue un acierto, 0 en caso contrario.
             auxNB += clasificadorNB(instancia,attrs,sample,targetAttr)
-            auxKNN += clasificadorKNN(instancia,attrs,sample,targetAttr,3)
+            auxKNN1 += clasificadorKNN(instancia,attrs,sample,targetAttr,1)
+            auxKNN3 += clasificadorKNN(instancia,attrs,sample,targetAttr,3)
             auxDT += clasificadorDecisionTree(instancia,attrs,targetAttr,tree)
+            #Clasifico aleatoriamente.
+            if (int(instancia[attrs.index(targetAttr)]) == randint(0,20)):
+                auxRandom += 1
             # print "----------------------------------------------------------------"
         porcentajeAciertosNB.append(round(100.00 * auxNB / (data_size - s_size),2))
-        porcentajeAciertosKNN.append(round(100.00 * auxKNN / (data_size - s_size),2))
+        porcentajeAciertosKNN1.append(round(100.00 * auxKNN1 / (data_size - s_size),2))
+        porcentajeAciertosKNN3.append(round(100.00 * auxKNN3 / (data_size - s_size),2))
         porcentajeAciertosDT.append(round(100.00 * auxDT / (data_size - s_size),2))
+        porcentajeAciertosRandom.append(round(100.00 * auxRandom / (data_size - s_size),2))
+    lstSize = len(porcentajeAciertosNB)
     print "Aciertos NB: "
-    for i in range(len(porcentajeAciertosNB)):
+    for i in range(lstSize):
         print "(" + str(i + startRange) + "," + str(porcentajeAciertosNB[i]) + ") "
     print ""
-    print "Aciertos KNN: "
-    for i in range(len(porcentajeAciertosKNN)):
-        print "(" + str(i + startRange) + "," + str(porcentajeAciertosKNN[i]) + ") "    
+    print "Aciertos KNN1: "
+    for i in range(lstSize):
+        print "(" + str(i + startRange) + "," + str(porcentajeAciertosKNN1[i]) + ") "    
     print ""
+    print "Aciertos KNN3: "
+    for i in range(lstSize):
+        print "(" + str(i + startRange) + "," + str(porcentajeAciertosKNN3[i]) + ") "    
+    print ""    
     print "Aciertos DT: "
-    for i in range(len(porcentajeAciertosDT)):
-        print "(" + str(i + startRange) + "," + str(porcentajeAciertosDT[i]) + ") "    
+    for i in range(lstSize):
+        print "(" + str(i + startRange) + "," + str(porcentajeAciertosDT[i]) + ") "
+    print ""
+    print "Aciertos Random: "
+    for i in range(lstSize):
+        print "(" + str(i + startRange) + "," + str(porcentajeAciertosRandom[i]) + ") "    
 
 def clasificadorNB(instancia,attrs,sample,targetAttr):
     # print "### clasificador NB ###"
@@ -272,4 +437,5 @@ def clasificadorDecisionTree(instancia,attrs,targetAttr,tree):
     else:
         return 0    
 
-main()
+# comparacionAlgoritmos()
+# testAciertos(0,100)
