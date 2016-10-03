@@ -1,11 +1,12 @@
 import numpy as np
 import math
 from random import randint
+import sys
 
-izquierda = 0
-derecha = 1
-arriba = 2
-abajo = 3
+# izquierda = 0
+# derecha = 1
+# arriba = 2
+# abajo = 3
 
 def main():
 	# Se numeran los estados de la realidad planteada de la sigueinte manera:
@@ -41,13 +42,48 @@ def main():
 	# El estado objetivo de la realidad planteada.
 	estadoObjetivo = 14
 
+	print 'Parte b) y=0,8  con 5 episodios:'
 	# La Constante de aprendizaje. 
-	y = 0.9
-
+	y = 0.8
 	# Cantidad de Episodios.
-	episodios = 200
-
+	episodios = 5
 	Q_learning(r,delta,estadoObjetivo,y,episodios)
+
+	print 'Parte b) y=0,8  con 10 episodios:'
+	# La Constante de aprendizaje. 
+	y = 0.8
+	# Cantidad de Episodios.
+	episodios = 10
+	Q_learning(r,delta,estadoObjetivo,y,episodios)
+
+	print 'Parte b) y=0,8  con 30 episodios:'
+	# La Constante de aprendizaje. 
+	y = 0.8
+	# Cantidad de Episodios.
+	episodios = 30
+	Q_learning(r,delta,estadoObjetivo,y,episodios)
+
+	print 'Parte c) y=0,4  con 5 episodios:'
+	# La Constante de aprendizaje. 
+	y = 0.4
+	# Cantidad de Episodios.
+	episodios = 5
+	Q_learning(r,delta,estadoObjetivo,y,episodios)
+
+	print 'Parte c) y=0,4  con 10 episodios:'
+	# La Constante de aprendizaje. 
+	y = 0.4
+	# Cantidad de Episodios.
+	episodios = 10
+	Q_learning(r,delta,estadoObjetivo,y,episodios)
+
+	print 'Parte c) y=0,4  con 30 episodios:'
+	# La Constante de aprendizaje. 
+	y = 0.4
+	# Cantidad de Episodios.
+	episodios = 30
+	Q_learning(r,delta,estadoObjetivo,y,episodios)
+
 
 # Funcion que retorna una accion valida para el estado s, de forma aleatoria.
 def elijoAccionParaEstado(s,delta):
@@ -56,6 +92,7 @@ def elijoAccionParaEstado(s,delta):
 	a = randint(0,cantAcciones-1)
 	while delta[s,a] == -1:
 		a = randint(0,cantAcciones-1)
+
 	return a
 
 # Funcion que retorna la accion de la cual se llega a el estado sig desde el estado ant
@@ -80,7 +117,7 @@ def Q_learning(r,delta,estadoObjetivo,y,episodios):
 
 		# selecciono un estado de forma aleatoria.
 		s = randint(0,cantEstados-1)
-		print 'Estado origen: ' + str(s)
+		#print 'Estado origen: ' + str(s)
 
 		# inicializo trayecto, una lista que guarda la secuencia de estados desde
 		# el origen s, hasta el estado objetivo.
@@ -116,8 +153,8 @@ def Q_learning(r,delta,estadoObjetivo,y,episodios):
 		# descontar la recompensa por retraso.
 		cant = 0.0
 
-		print 'Trayecto desde el estado origen ' + str(trayecto[0]) + ' al estado objetivo ' + str(trayecto[len(trayecto)-1]) + ':'
-		print trayecto
+		#print 'Trayecto desde el estado origen ' + str(trayecto[0]) + ' al estado objetivo ' + str(trayecto[len(trayecto)-1]) + ':'
+		#print trayecto
 
 		# A continuacion recorro el trayecto en orden inverso, para lo cual
 		# primero obtengo el ultimo estado de trayecto, el estado objetivo.
@@ -149,10 +186,55 @@ def Q_learning(r,delta,estadoObjetivo,y,episodios):
 			# me muevo hacia atras en el trayecto.
 			actual = anterior
 
-		# Fin del algoritmo para Q.
+	# Fin del algoritmo para Q.
 
-		print 'La matriz con los retornos para cada estado y accion aprendidos en el episodio ' + str(ep) + ' es:'
-		print Q
-		print '------------------------------------------------------------------------------------------------------'
+	#print 'La matriz con los retornos para cada estado y accion aprendidos en el episodio ' + str(ep) + ' es:'
+	#print Q
+	politicaOptima(Q,delta,estadoObjetivo)
+	#print '------------------------------------------------------------------------------------------------------'
+
+def politicaOptima(Q,delta,estadoObjetivo):
+	accionesOptimas = np.zeros(len(Q))
+	for s in range(len(Q)):
+		temp = -sys.maxint - 1
+		for a in range(Q.shape[1]):
+			if Q[s,a] > temp:
+				accionesOptimas[s] = a
+				temp = Q[s,a]
+
+		# si para un estado s, y para todas las acciones a, Q*(s,a) = 0, se elige una accion valida para el estado s.
+		if temp == 0 and s != estadoObjetivo:
+			acc = elijoAccionParaEstado(s,delta)
+			accionesOptimas[s] = acc
+
+	#print 'Las acciones Optimas aprendidas para cada estado son: '
+	#print accionesOptimas
+	graficarPolitica(accionesOptimas)
+
+def graficarPolitica(a):
+	aStr = ["" for x in range(len(a))]
+	for x in range(len(a)):
+
+		if a[x] == 0:
+			aStr[x] = ' < '
+
+		if a[x] == 1:
+			aStr[x] = ' > '
+
+		if a[x] == 2:
+			aStr[x] = ' ^ '
+
+		if a[x] == 3:
+			aStr[x] = ' v '
+
+	print '-------------------------'
+	print '|' + aStr[0] + '|' + aStr[1] + '|' + aStr[2] + '|' + aStr[3] + '|' + aStr[4] + '|' + aStr[5] + '|'
+	print '|' + aStr[6] + '|' + aStr[7] + '|' + aStr[8] + '|' + aStr[9] + '|' + aStr[10] + '|' + aStr[11] + '|'
+	print '|' + aStr[12] + '|' + aStr[13] + '|   G   |'  + aStr[15] + '|' + aStr[16] + '|'
+	print '|' + aStr[17] + '|' + aStr[18] + '|   G   |'  + aStr[19] + '|' + aStr[20] + '|'
+	print '|' + aStr[21] + '|' + aStr[22] + '|' + aStr[23] + '|' + aStr[24] + '|' + aStr[25] + '|' + aStr[26] + '|'
+	print '|' + aStr[27] + '|' + aStr[28] + '|' + aStr[29] + '|' + aStr[30] + '|' + aStr[31] + '|' + aStr[32] + '|'
+	print '-------------------------'
+
 
 main()
