@@ -1,0 +1,27 @@
+Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 5 episodios:
+-------------------------
+| v | < | < | < | < | v |
+| v | v | < | ^ | > | < |
+| > | v |   G   | < | ^ |
+| v | < |   G   | v | v |
+| v | v | ^ | v | < | v |
+| > | > | ^ | < | < | < |
+-------------------------
+Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 10 episodios:
+-------------------------
+| v | v | > | v | v | v |
+| v | v | v | v | < | < |
+| ^ | < |   G   | > | ^ |
+| v | v |   G   | > | ^ |
+| v | v | > | ^ | ^ | ^ |
+| > | < | ^ | > | > | ^ |
+-------------------------
+Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 30 episodios:
+-------------------------
+| > | v | > | v | v | v |
+| > | > | v | v | v | < |
+| ^ | v |   G   | v | v |
+| ^ | v |   G   | v | < |
+| > | > | ^ | ^ | < | v |
+| > | > | ^ | ^ | < | < |
+-------------------------

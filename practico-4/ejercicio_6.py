@@ -41,49 +41,65 @@ def main():
 
 	# El estado objetivo de la realidad planteada.
 	estadoObjetivo = 14
-
-	print 'Parte b) y=0,8  con 5 episodios:'
+	salida = []
+	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 5 episodios:' + '\n')
+	#print 'Parte b) y=0,8  con 5 episodios:'
 	# La Constante de aprendizaje. 
 	y = 0.8
 	# Cantidad de Episodios.
 	episodios = 5
-	Q_learning(r,delta,estadoObjetivo,y,episodios)
 
-	print 'Parte b) y=0,8  con 10 episodios:'
+	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
+
+	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 10 episodios:' + '\n')
+	#print 'Parte b) y=0,8  con 10 episodios:'
 	# La Constante de aprendizaje. 
 	y = 0.8
 	# Cantidad de Episodios.
 	episodios = 10
-	Q_learning(r,delta,estadoObjetivo,y,episodios)
+	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	print 'Parte b) y=0,8  con 30 episodios:'
+	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 30 episodios:' + '\n')
+	#print 'Parte b) y=0,8  con 30 episodios:'
 	# La Constante de aprendizaje. 
 	y = 0.8
 	# Cantidad de Episodios.
 	episodios = 30
-	Q_learning(r,delta,estadoObjetivo,y,episodios)
+	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	print 'Parte c) y=0,4  con 5 episodios:'
+	f = open('out/parte-b.txt', 'w')
+	for s in salida:
+		f.write(s)
+	f.close()
+
+	salida = []
+	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,4 y despues de 5 episodios:' + '\n')
+	#print 'Parte c) y=0,4  con 5 episodios:'
 	# La Constante de aprendizaje. 
 	y = 0.4
 	# Cantidad de Episodios.
 	episodios = 5
-	Q_learning(r,delta,estadoObjetivo,y,episodios)
+	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	print 'Parte c) y=0,4  con 10 episodios:'
+	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,4 y despues de 10 episodios:' + '\n')
+	#print 'Parte c) y=0,4  con 10 episodios:'
 	# La Constante de aprendizaje. 
 	y = 0.4
 	# Cantidad de Episodios.
 	episodios = 10
-	Q_learning(r,delta,estadoObjetivo,y,episodios)
+	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	print 'Parte c) y=0,4  con 30 episodios:'
+	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,4 y despues de 30 episodios:' + '\n')
+	#print 'Parte c) y=0,4  con 30 episodios:'
 	# La Constante de aprendizaje. 
 	y = 0.4
 	# Cantidad de Episodios.
 	episodios = 30
-	Q_learning(r,delta,estadoObjetivo,y,episodios)
-
+	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
+	f = open('out/parte-c.txt', 'w')
+	for s in salida:
+		f.write(s)
+	f.close()
 
 # Funcion que retorna una accion valida para el estado s, de forma aleatoria.
 def elijoAccionParaEstado(s,delta):
@@ -104,7 +120,7 @@ def getAccionEntreEstados(ant, sig, delta):
 		if delta[ant,a] == sig:
 			return a
 
-def Q_learning(r,delta,estadoObjetivo,y,episodios):
+def Q_learning(r,delta,estadoObjetivo,y,episodios,salida):
 
 	cantEstados = len(delta)
 	cantAcciones = delta.shape[1]
@@ -190,10 +206,10 @@ def Q_learning(r,delta,estadoObjetivo,y,episodios):
 
 	#print 'La matriz con los retornos para cada estado y accion aprendidos en el episodio ' + str(ep) + ' es:'
 	#print Q
-	politicaOptima(Q,delta,estadoObjetivo)
+	politicaOptima(Q,delta,estadoObjetivo,salida)
 	#print '------------------------------------------------------------------------------------------------------'
 
-def politicaOptima(Q,delta,estadoObjetivo):
+def politicaOptima(Q,delta,estadoObjetivo,salida):
 	accionesOptimas = np.zeros(len(Q))
 	for s in range(len(Q)):
 		temp = -sys.maxint - 1
@@ -209,9 +225,9 @@ def politicaOptima(Q,delta,estadoObjetivo):
 
 	#print 'Las acciones Optimas aprendidas para cada estado son: '
 	#print accionesOptimas
-	graficarPolitica(accionesOptimas)
+	graficarPolitica(accionesOptimas, salida)
 
-def graficarPolitica(a):
+def graficarPolitica(a, salida):
 	aStr = ["" for x in range(len(a))]
 	for x in range(len(a)):
 
@@ -227,14 +243,14 @@ def graficarPolitica(a):
 		if a[x] == 3:
 			aStr[x] = ' v '
 
-	print '-------------------------'
-	print '|' + aStr[0] + '|' + aStr[1] + '|' + aStr[2] + '|' + aStr[3] + '|' + aStr[4] + '|' + aStr[5] + '|'
-	print '|' + aStr[6] + '|' + aStr[7] + '|' + aStr[8] + '|' + aStr[9] + '|' + aStr[10] + '|' + aStr[11] + '|'
-	print '|' + aStr[12] + '|' + aStr[13] + '|   G   |'  + aStr[15] + '|' + aStr[16] + '|'
-	print '|' + aStr[17] + '|' + aStr[18] + '|   G   |'  + aStr[19] + '|' + aStr[20] + '|'
-	print '|' + aStr[21] + '|' + aStr[22] + '|' + aStr[23] + '|' + aStr[24] + '|' + aStr[25] + '|' + aStr[26] + '|'
-	print '|' + aStr[27] + '|' + aStr[28] + '|' + aStr[29] + '|' + aStr[30] + '|' + aStr[31] + '|' + aStr[32] + '|'
-	print '-------------------------'
+	salida.append('-------------------------' + '\n')
+	salida.append('|' + aStr[0] + '|' + aStr[1] + '|' + aStr[2] + '|' + aStr[3] + '|' + aStr[4] + '|' + aStr[5] + '|' + '\n')
+	salida.append('|' + aStr[6] + '|' + aStr[7] + '|' + aStr[8] + '|' + aStr[9] + '|' + aStr[10] + '|' + aStr[11] + '|' + '\n')
+	salida.append('|' + aStr[12] + '|' + aStr[13] + '|   G   |'  + aStr[15] + '|' + aStr[16] + '|' + '\n')
+	salida.append('|' + aStr[17] + '|' + aStr[18] + '|   G   |'  + aStr[19] + '|' + aStr[20] + '|' + '\n')
+	salida.append('|' + aStr[21] + '|' + aStr[22] + '|' + aStr[23] + '|' + aStr[24] + '|' + aStr[25] + '|' + aStr[26] + '|' + '\n')
+	salida.append('|' + aStr[27] + '|' + aStr[28] + '|' + aStr[29] + '|' + aStr[30] + '|' + aStr[31] + '|' + aStr[32] + '|' + '\n')
+	salida.append('-------------------------' + '\n')
 
 
 main()
