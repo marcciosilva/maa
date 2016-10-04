@@ -9,11 +9,16 @@ def rand(a, b):
 
 # Sigmoid
 def sigmoid(x):
-	return 1 / (1 + math.exp(-x))
+	try:
+		return 1 / (1 + numpy.exp(-x))
+	except OverflowError:
+		print 'overflow'
+		return 1
 
 # Derivada de sigmoid
 def dsigmoid(x):
-	return x*(1-x)
+	sig = sigmoid(x)
+	return sig*(1-sig)
 	
 #input: nodos de entrada
 #hidden: nodos ocultos
@@ -30,10 +35,10 @@ class Network:
 		
 		for i in range(self.input):
 			for j in range(self.hidden):
-				self.wi[i][j] = rand(-0.2, 0.2)
+				self.wi[i][j] = rand(-1.0, 1.0)
 		for j in range(self.hidden):
 			for k in range(self.output):
-				self.wo[j][k] = rand(-2.0, 2.0)
+				self.wo[j][k] = rand(-1.0, 1.0)
 				
 		# activations for nodes
 		self.xi = [1.0]*self.input
@@ -51,7 +56,7 @@ class Network:
 		for j in range(self.hidden):
 			sum = 0.0
 			for i in range(self.input):
-				sum = sum + self.xi[i] * self.wi[i][j]
+				sum = sum + self.xi[i] * self.wi[i][j]				
 			self.xh[j] = sigmoid(sum)
 
 		# Calcula la salida de los nodos de salida
@@ -69,7 +74,7 @@ class Network:
 		outputError = [0.0] * self.output
 		for k in range(self.output):
 			outputError[k] = dsigmoid(self.xo[k]) * (targets[k]-self.xo[k])
-
+		
 		# Delta para los nodos ocultos
 		hiddenError = [0.0] * self.hidden
 		for j in range(self.hidden):
@@ -77,7 +82,7 @@ class Network:
 			for k in range(self.output):
 				error = error + outputError[k]*self.wo[j][k]
 			hiddenError[j] = dsigmoid(self.xh[j]) * error
-	
+		
 		# Error
 		error = 0.0
 		for k in range(len(targets)):
@@ -88,20 +93,20 @@ class Network:
 			for k in range(self.output):
 				self.wo[j][k] = self.wo[j][k] + N * outputError[k] * self.xh[j]				
 
-		# update pesos de nodos de entrada
+		# Recalculp pesos de nodos de entrada
 		for i in range(self.input):
 			for j in range(self.hidden):
 				self.wi[i][j] = self.wi[i][j] + N* hiddenError[j] * self.xi[i]
-			
+		
 		return error
 
 	def test(self, patterns):
 		for p in patterns:
-			print(p[0], '->', self.update(p[0]))
+			print( p[0][0], self.update(p[0])[0])
+			#print(p[0], '->', self.update(p[0]))
 	
-	# Entrena a la red neuronal
+	# Entrena a la red neuronal	
 	# N=factor de aprendizaje
-	# targetError = error objetivo hasta el cual seguira entrenando.
 	def train(self, examples, N=0.5, maxIters=1000):
 		i=0
 		while (i<maxIters):
@@ -114,21 +119,25 @@ class Network:
 			i=i+1
 		print('error %-.5f' % error)
 
+def sen():
+	return [[[x/20.0], [round(math.sin(x*math.pi*1.5),3)]] for x in range(-20,21)]
+	
+def senTest():
+	return [[[x/100.0], [round(math.sin(x*math.pi*1.5),3)]] for x in range(-100,101)]
+	
+def qtest():
+	return [[[x/100.0], [round((x/100.0)**2,3)]] for x in range(-100, 101)]
+
+def quadr():
+	return [[[x/20.0], [round((x/20.0)**2,3)]] for x in range(-20,21)]
+	
 def main():
 	random.seed(0)
-	
+	print sen()
 	#x^2
-	cuadr = [
-		 [[0,0,0], [0,0,0,0,0]],
-		 [[0,0,1], [0,0,0,0,1]],
-		 [[0,1,0], [0,0,0,1,1]],
-		 [[1,0,0], [1,0,0,0,0]],
-		 [[1,0,1], [1,1,0,0,1]],		 
-		 ]
-	
-	n = Network(3, 8, 5)
-	n.train(cuadr)
-	n.test(cuadr)
+	n = Network(1, 100, 1)
+	n.train(sen())
+	n.test(senTest())
 
 main()
 
