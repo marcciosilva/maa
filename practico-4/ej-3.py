@@ -110,6 +110,7 @@ class Network:
 	# N=factor de aprendizaje
 	def train(self, examples, N, maxIters):
 		i=0
+		errorList = []
 		while (i<maxIters):
 			error = 0.0
 			for p in examples:
@@ -117,9 +118,12 @@ class Network:
 				targets = p[1]
 				# Evalua inputs en la red actual (forward propagation)
 				self.update(inputs)				
+				# errorList.append(self.backPropagation(targets, N))
 				error = error + self.backPropagation(targets, N)				
 			i=i+1
-		print('error %-.5f' % error)
+			errorList.append(error)
+		return errorList
+		# print('error %-.5f' % error)
 
 def sen():
 	# return [[[x/20.0], [round(math.sin(x*math.pi*1.5),3)]] for x in range(-20,19)]
@@ -170,38 +174,64 @@ def main():
 	setIteraciones = [10**2, 10**3, 10**4, 10**5]
 	N = 0.5
 	print "#############Test funcion seno#############"
+	print
 	print "#############Funcion original#############"
 	for element in sen():
 		print (element[0][0], element[1][0])
 	for iteraciones in setIteraciones:
+		print
 		print "#############Test con " + str(iteraciones) + " iteraciones#############"
 		n = Network(1, 20, 1)
-		n.train(sen(), N, iteraciones)
+		errorList = n.train(sen(), N, iteraciones)
+		print
+		print "##################ERRORES###################"
+		for i in range(len(errorList)):
+			print (i, errorList[i])
+		print "##################FIN ERRORES###################"
+		print
 		# Se testea contra los datos de entrada a ver que tanto llega a asimilarse a la funcion
 		# original para esos puntos.		
 		n.test(sen())
 		# n.test(senTest())
+	print
+	print "#############Test funcion cuadratica#############"
+	print
 	print "#############Funcion original#############"
 	for element in quadr():
 		print (element[0][0], element[1][0])	
-	print "#############Test funcion cuadratica#############"
 	for iteraciones in setIteraciones:
+		print
 		print "#############Test con " + str(iteraciones) + " iteraciones#############"
 		n = Network(1,20,1)
-		n.train(quadr(), N, iteraciones)
+		errorList = n.train(quadr(), N, iteraciones)
+		print
+		print "##################ERRORES###################"
+		for i in range(len(errorList)):
+			print (i, errorList[i])
+		print "##################FIN ERRORES###################"
+		print
 		# Se testea contra los datos de entrada a ver que tanto llega a asimilarse a la funcion
 		# original para esos puntos.
 		n.test(quadr())
 		# n.test(qtest())
+	print
 	print "#############Test funcion h(x)#############"
+	print
 	print "#############Funcion original#############"
 	print h(-1.0,1.1,0.4)	
 	for element in h(-1.0,1.1,0.4):
 		print ((element[0][0], element[0][1]), element[1][0])
 	for iteraciones in setIteraciones:
+		print
 		print "#############Test con " + str(iteraciones) + " iteraciones#############"
 		n = Network(1,20,1)
-		n.train(h(-1.0,1.1,0.4), N, iteraciones)
+		errorList = n.train(h(-1.0,1.1,0.4), N, iteraciones)
+		print
+		print "##################ERRORES###################"
+		for i in range(len(errorList)):
+			print (i, errorList[i])	
+		print "##################FIN ERRORES###################"
+		print
 		# Se testea contra los datos de entrada a ver que tanto llega a asimilarse a la funcion
 		# original para esos puntos.
 		n.test(h(-1.0,1.1,0.4))
