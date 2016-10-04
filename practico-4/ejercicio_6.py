@@ -42,26 +42,26 @@ def main():
 	# El estado objetivo de la realidad planteada.
 	estadoObjetivo = 14
 	salida = []
-	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 5 episodios:' + '\n')
-	#print 'Parte b) y=0,8  con 5 episodios:'
-	# La Constante de aprendizaje. 
+	salida.append('Politica aprendida con la constante gamma igual a 0,8 y despues de 5 episodios:' + '\n')
+	
+	# constante Factor de descuento. 
 	y = 0.8
 	# Cantidad de Episodios.
 	episodios = 5
 
 	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 10 episodios:' + '\n')
-	#print 'Parte b) y=0,8  con 10 episodios:'
-	# La Constante de aprendizaje. 
+	salida.append('Politica aprendida con la constante gamma igual a 0,8 y despues de 10 episodios:' + '\n')
+	
+	# constante Factor de descuento.  
 	y = 0.8
 	# Cantidad de Episodios.
 	episodios = 10
 	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,8 y despues de 30 episodios:' + '\n')
-	#print 'Parte b) y=0,8  con 30 episodios:'
-	# La Constante de aprendizaje. 
+	salida.append('Politica aprendida con la constante gamma igual a 0,8 y despues de 30 episodios:' + '\n')
+	
+	# constante Factor de descuento. 
 	y = 0.8
 	# Cantidad de Episodios.
 	episodios = 30
@@ -73,25 +73,25 @@ def main():
 	f.close()
 
 	salida = []
-	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,4 y despues de 5 episodios:' + '\n')
-	#print 'Parte c) y=0,4  con 5 episodios:'
-	# La Constante de aprendizaje. 
+	salida.append('Politica aprendida con la constante gamma igual a 0,4 y despues de 5 episodios:' + '\n')
+	
+	# constante Factor de descuento. 
 	y = 0.4
 	# Cantidad de Episodios.
 	episodios = 5
 	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,4 y despues de 10 episodios:' + '\n')
-	#print 'Parte c) y=0,4  con 10 episodios:'
-	# La Constante de aprendizaje. 
+	salida.append('Politica aprendida con la constante gamma igual a 0,4 y despues de 10 episodios:' + '\n')
+	
+	# constante Factor de descuento.  
 	y = 0.4
 	# Cantidad de Episodios.
 	episodios = 10
 	Q_learning(r,delta,estadoObjetivo,y,episodios,salida)
 
-	salida.append('Politica aprendida con la constante de aprendizaje igual a 0,4 y despues de 30 episodios:' + '\n')
-	#print 'Parte c) y=0,4  con 30 episodios:'
-	# La Constante de aprendizaje. 
+	salida.append('Politica aprendida con la constante gamma igual a 0,4 y despues de 30 episodios:' + '\n')
+	
+	# constante Factor de descuento. 
 	y = 0.4
 	# Cantidad de Episodios.
 	episodios = 30
