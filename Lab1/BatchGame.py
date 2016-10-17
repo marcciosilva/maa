@@ -9,9 +9,10 @@ from Players.RandomPlayer import RandomPlayer
 class BatchGame(Game):
     DIRS = 8
 
-    def __init__(self, black_player=RandomPlayer, white_player=RandomPlayer):
+    def __init__(self, black_player=RandomPlayer, white_player=RandomPlayer, directory='logs'):
         self.players = {SquareType.BLACK: black_player(SquareType.BLACK),
                         SquareType.WHITE: white_player(SquareType.WHITE)}
+        self.directory = directory
         super(BatchGame, self).__init__()
 
     def play(self):
@@ -23,7 +24,8 @@ class BatchGame(Game):
             else:
                 self._last_move = None
             self._pass_turn()
-        self._log_to_file()
+        # print "Logueando a archivo..."
+        self._log_to_file(self.directory)
         if self._game_status == GameStatus.BLACK_WINS:
             self.players[SquareType.WHITE].on_defeat(deepcopy(self._state))
             self.players[SquareType.BLACK].on_win(deepcopy(self._state))

@@ -1,6 +1,7 @@
 import datetime
 import csv
 import glob
+import math
 from DataTypes import SquareType, GameStatus
 from Board import Board
 from Move import Move
@@ -10,8 +11,9 @@ import numpy
 
 # Genera una lista de listas, donde cada lista interna
 # corresponde con los movimientos de una partida en particular.
+
 def readLogs():
-	filenames = glob.glob('./logs/*.csv')
+	filenames = glob.glob('./logs' + str(gameAmount) + '/*.csv')
 	allMoves=[]
 	for filename in filenames:
 		file = open(filename, 'rb')
@@ -62,6 +64,10 @@ def convert_matrix_board_to_nparray(board):
     # print lst
     return numpy.array(lst)
 	
+gameAmount = 100
+hiddenLayerSize = int(math.ceil(gameAmount / (2.0 * (64 + 1))))
+print str(hiddenLayerSize) + ' hidden layers.'
+
 gameHistory = readLogs()
 data=[]
 
@@ -69,8 +75,12 @@ for game in gameHistory:
 	getData(game,data)
 	# fit(data)
 
-clf = MLPRegressor(solver='lbfgs', activation='tanh', alpha=1e-4, 
-	hidden_layer_sizes=(44), random_state=1, learning_rate_init=.1)
+if (gameAmount >= 1000):
+	clf = MLPRegressor(solver='adam', activation='tanh', alpha=1e-4, 
+	hidden_layer_sizes=(hiddenLayerSize), random_state=1, learning_rate_init=.1)
+else:
+	clf = MLPRegressor(solver='lbfgs', activation='tanh', alpha=1e-4, 
+	hidden_layer_sizes=(hiddenLayerSize), random_state=1, learning_rate_init=.1)
 X=numpy.array([convert_matrix_board_to_nparray(x[0]) for x in data])
 y=[z[0] for z in [numpy.array(x[1]).reshape(1,-1) for x in data]]
 
@@ -79,7 +89,7 @@ clf.fit(X,y)
 print y[12]
 print clf.predict(X[12])
 
-joblib.dump(clf, 'red-neuronal-test.pkl')
+joblib.dump(clf, 'red-neuronal-test-' + str(gameAmount) + '-partidas.pkl')
 
 # 
 # y=[[x[1] for x in y] for y in data]

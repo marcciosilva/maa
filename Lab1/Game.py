@@ -6,6 +6,7 @@ from collections import defaultdict
 from Board import Board
 import datetime
 import csv
+import uuid
 
 
 class Game(object):
@@ -17,8 +18,8 @@ class Game(object):
         self._last_move = None
         self._move_list = []
 
-    def _log_to_file(self):
-        with open('./logs/log_' + datetime.datetime.now().strftime('%m-%d %H%M%S') + '.csv', 'w') as f:
+    def _log_to_file(self, directory):
+        with open('./' + directory + '/log_' + str(uuid.uuid4()) + '.csv', 'w') as f:
             w = csv.writer(f)
             for move, color in self._move_list:
                 if move:
