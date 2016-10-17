@@ -5,8 +5,11 @@ from DataTypes import SquareType, GameStatus
 from Board import Board
 from Move import Move
 from sklearn.neural_network import MLPRegressor
+from sklearn.externals import joblib
 import numpy
 
+# Genera una lista de listas, donde cada lista interna
+# corresponde con los movimientos de una partida en particular.
 def readLogs():
 	filenames = glob.glob('./logs/*.csv')
 	allMoves=[]
@@ -42,6 +45,7 @@ def getData(game,data):
 	board = Board(8,8)
 	color = getWinningColor(game)
 	for move in game:
+		matrix = board.get_as_matrix()
 		if isMyMove(color, move):
 			boardAsMatrix=board.get_as_matrix()
 			if (color=='WHITE'):
@@ -65,7 +69,8 @@ for game in gameHistory:
 	getData(game,data)
 	# fit(data)
 
-clf = MLPRegressor(solver='lbfgs', activation='tanh', alpha=1e-4, hidden_layer_sizes=(44), random_state=1, learning_rate_init=.1)
+clf = MLPRegressor(solver='lbfgs', activation='tanh', alpha=1e-4, 
+	hidden_layer_sizes=(44), random_state=1, learning_rate_init=.1)
 X=numpy.array([convert_matrix_board_to_nparray(x[0]) for x in data])
 y=[z[0] for z in [numpy.array(x[1]).reshape(1,-1) for x in data]]
 
@@ -73,6 +78,8 @@ clf.fit(X,y)
 
 print y[12]
 print clf.predict(X[12])
+
+joblib.dump(clf, 'red-neuronal-test.pkl')
 
 # 
 # y=[[x[1] for x in y] for y in data]
