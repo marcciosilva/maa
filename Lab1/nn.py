@@ -13,14 +13,11 @@ def readLogs():
 	for filename in filenames:
 		file = open(filename, 'rb')
 		reader = csv.reader(file)
-		
-		firstRow = next(reader)
-		moves=[((int(firstRow[0]), int(firstRow[1])), firstRow[2], firstRow[3])]
+
+		moves=[]
 		for row in reader:
 			if (len(row) == 4):
 				moves.append(((int(row[0]), int(row[1])), row[2], row[3]))
-			# else:
-				# moves.append(((row[0]), row[1], row[2]))
 		allMoves.append(moves)
 	return allMoves
 
