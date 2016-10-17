@@ -18,7 +18,7 @@ def readLogs():
 			if (len(row) == 4):
 				moves.append(((int(row[0]), int(row[1])), row[2], row[3]))
 			else:
-				moves.append(((row[0]), row[1]))
+				moves.append(((row[0]), row[1], row[2]))
 		allMoves.append(moves)
 	return allMoves
 
