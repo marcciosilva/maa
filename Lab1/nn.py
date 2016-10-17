@@ -4,6 +4,8 @@ import glob
 from DataTypes import SquareType, GameStatus
 from Board import Board
 from Move import Move
+from sklearn.neural_network import MLPRegressor
+import numpy
 
 def readLogs():
 	filenames = glob.glob('./logs/*.csv')
@@ -17,8 +19,8 @@ def readLogs():
 		for row in reader:
 			if (len(row) == 4):
 				moves.append(((int(row[0]), int(row[1])), row[2], row[3]))
-			else:
-				moves.append(((row[0]), row[1], row[2]))
+			# else:
+				# moves.append(((row[0]), row[1], row[2]))
 		allMoves.append(moves)
 	return allMoves
 
@@ -38,10 +40,9 @@ def excecuteMove(move, board):
 def invertBoard(board):
 	return [[(-(x-1)) if (x<2) else x for x in y] for y in board]
 	
-def getData(game):
+def getData(game,data):
 	board = []
 	board = Board(8,8)
-	data=[]
 	color = getWinningColor(game)
 	for move in game:
 		if isMyMove(color, move):
@@ -51,13 +52,39 @@ def getData(game):
 			data.append((boardAsMatrix, move[0]))
 		excecuteMove(move, board)
 	return data
+
+def convert_matrix_board_to_nparray(board):
+    lst = []
+    for row in board:
+        for element in row:
+            lst.append(element)
+    # print lst
+    return numpy.array(lst)
 	
-myColor='BLACK'
 gameHistory = readLogs()
 data=[]
+
 for game in gameHistory:
-	data.append(getData(game))
+	getData(game,data)
 	# fit(data)
-print data
+
+clf = MLPRegressor(solver='lbfgs', activation='tanh', alpha=1e-4, hidden_layer_sizes=(44), random_state=1, learning_rate_init=.1)
+X=numpy.array([convert_matrix_board_to_nparray(x[0]) for x in data])
+y=[z[0] for z in [numpy.array(x[1]).reshape(1,-1) for x in data]]
+
+clf.fit(X,y)
+
+print y[12]
+print clf.predict(X[12])
+
+# 
+# y=[[x[1] for x in y] for y in data]
+# print '---'
+# print X[0]
+# print y
+# print [[x[0], x[1]] for x in y]
+
+
+
 		
 		
