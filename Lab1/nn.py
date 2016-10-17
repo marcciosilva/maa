@@ -34,16 +34,21 @@ def excecuteMove(move, board):
 	col = SquareType.BLACK if move[1]=='BLACK' else SquareType.WHITE
 	for square in board.get_squares_to_mark(Move(move[0][0], move[0][1]), move[1]):
 		board.set_position(square[0], square[1], col)
-
+		
+def invertBoard(board):
+	return [[(-(x-1)) if (x<2) else x for x in y] for y in board]
+	
 def getData(game):
 	board = []
 	board = Board(8,8)
 	data=[]
 	color = getWinningColor(game)
-	print color
 	for move in game:
 		if isMyMove(color, move):
-			data.append((board.get_as_matrix(), move[0]))
+			boardAsMatrix=board.get_as_matrix()
+			if (color=='WHITE'):
+				boardAsMatrix=invertBoard(boardAsMatrix)
+			data.append((boardAsMatrix, move[0]))
 		excecuteMove(move, board)
 	return data
 	
