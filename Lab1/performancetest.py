@@ -25,10 +25,16 @@ def readLogs():
 		allMoves.append(moves)
 	return allMoves
 
-def getWinningColor(game):	
-	return 'BLACK' if (game[0][2] == 'GameStatus.BLACK_WINS') else 'WHITE'
+def getWinningColor(game):
+	gameStatus = game[0][2]
+	if (gameStatus == 'GameStatus.BLACK_WINS'):
+		return 'BLACK'
+	elif (gameStatus == 'GameStatus.WHITE_WINS'):
+		return 'WHITE'
+	else:
+		return 'DRAW'
 
-gameAmount = 3000
+gameAmount = 100
 gameHistory = readLogs()
 gamesWon = 0.0
 for game in gameHistory:

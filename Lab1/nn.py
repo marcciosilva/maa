@@ -27,8 +27,14 @@ def readLogs():
 		file.close
 	return allMoves
 
-def getWinningColor(game):	
-	return 'BLACK' if (game[0][2] == 'GameStatus.BLACK_WINS') else 'WHITE'
+def getWinningColor(game):
+	gameStatus = game[0][2]
+	if (gameStatus == 'GameStatus.BLACK_WINS'):
+		return 'BLACK'
+	elif (gameStatus == 'GameStatus.WHITE_WINS'):
+		return 'WHITE'
+	else:
+		return 'DRAW'
 
 def isMyMove(myColor, row):
 	return (row[1]==myColor)
@@ -47,16 +53,49 @@ def getData(game,data):
 	board = []
 	board = Board(8,8)
 	color = getWinningColor(game)
-	for move in game:
-		matrix = board.get_as_matrix()
-		if isMyMove(color, move):
-			boardAsMatrix=board.get_as_matrix()
-			if (color=='WHITE'):
-				boardAsMatrix=invertBoard(boardAsMatrix)
-			movem = numpy.zeros((8,8))
-			movem[move[0][0]][move[0][1]]=1000
-			data.append((boardAsMatrix, movem))
-		excecuteMove(move, board)
+	if (color == 'BLACK'):
+		# Cada move es una fila del .csv de la partida
+		for move in game:
+			matrix = board.get_as_matrix()
+			if isMyMove(color, move):
+				boardAsMatrix=board.get_as_matrix()
+				# if (color=='WHITE'):
+				# 	boardAsMatrix=invertBoard(boardAsMatrix)
+				# Genero lo que va a ser la salida para la instancia
+				# de entrenamiento.
+				movem = numpy.zeros((8,8))
+				# Asigno puntaje al movimiento realizado, sabiendo que gano.
+				movem[move[0][0]][move[0][1]]=1
+				data.append((boardAsMatrix, movem))
+			excecuteMove(move, board)
+	elif (color == 'WHITE'):
+		# Cada move es una fila del .csv de la partida
+		for move in game:
+			matrix = board.get_as_matrix()
+			if isMyMove(color, move):
+				boardAsMatrix=board.get_as_matrix()
+				# if (color=='WHITE'):
+				# 	boardAsMatrix=invertBoard(boardAsMatrix)
+				# Genero lo que va a ser la salida para la instancia
+				# de entrenamiento.
+				movem = numpy.zeros((8,8))
+				# Asigno puntaje al movimiento realizado, sabiendo que pierdo.
+				movem[move[0][0]][move[0][1]]=-1
+				data.append((boardAsMatrix, movem))
+			excecuteMove(move, board)				
+	elif (color != 'DRAW'):
+		# Cada move es una fila del .csv de la partida
+		for move in game:
+			matrix = board.get_as_matrix()
+			if isMyMove(color, move):
+				boardAsMatrix=board.get_as_matrix()
+				# if (color=='WHITE'):
+				# 	boardAsMatrix=invertBoard(boardAsMatrix)
+				# Genero lo que va a ser la salida para la instancia
+				# de entrenamiento.
+				movem = numpy.zeros((8,8))
+				data.append((boardAsMatrix, movem))
+			excecuteMove(move, board)		
 	return data
 
 def convert_matrix_board_to_nparray(board):
@@ -68,7 +107,7 @@ def convert_matrix_board_to_nparray(board):
 	return numpy.array(lst)
 	
 gameAmount = 10000
-hiddenLayerSize = int(math.ceil(gameAmount / (1.0 * (64 + 2))))
+hiddenLayerSize = 64#int(math.ceil(gameAmount / (1.0 * (64 + 2))))
 
 print str(hiddenLayerSize) + ' hidden layers.'
 
@@ -79,12 +118,8 @@ for game in gameHistory:
 	getData(game,data)
 	# fit(data)
 
-if (gameAmount >= 1000):
-	clf = MLPRegressor(solver='adam', activation='identity', alpha=1e-4, 
-	hidden_layer_sizes=(hiddenLayerSize), learning_rate_init=.01, max_iter=300)
-else:
-	clf = MLPRegressor(solver='lbfgs', activation='tanh', alpha=1e-4, 
-	hidden_layer_sizes=(hiddenLayerSize), learning_rate_init=.1)
+clf = MLPRegressor(activation='identity', hidden_layer_sizes=(hiddenLayerSize), 
+	learning_rate_init=.01)
 X=numpy.array([convert_matrix_board_to_nparray(x[0]) for x in data])
 y=[z[0] for z in [numpy.array(x[1]).reshape(1,-1) for x in data]]
 
