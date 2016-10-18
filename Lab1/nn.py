@@ -81,7 +81,7 @@ for game in gameHistory:
 
 if (gameAmount >= 1000):
 	clf = MLPRegressor(solver='adam', activation='identity', alpha=1e-4, 
-	hidden_layer_sizes=(hiddenLayerSize), learning_rate_init=.001, max_iter =200)
+	hidden_layer_sizes=(hiddenLayerSize), learning_rate_init=.01, max_iter=300)
 else:
 	clf = MLPRegressor(solver='lbfgs', activation='tanh', alpha=1e-4, 
 	hidden_layer_sizes=(hiddenLayerSize), learning_rate_init=.1)
