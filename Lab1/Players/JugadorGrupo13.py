@@ -56,11 +56,11 @@ class JugadorGrupo13(Player):
 
 	def on_win(self, board):
 		# joblib.dump(neuralNetwork, 'red-neuronal-test.pkl')
-		print 'Ganéppp y soy el color:' + self.color.name
+		print 'Gané y soy el color:' + self.color.name
 
 	def on_defeat(self, board):
 		# joblib.dump(neuralNetwork, 'red-neuronal-test.pkl')
-		print 'Perdíppp y soy el color:' + self.color.name
+		print 'Perdí y soy el color:' + self.color.name
 
 	def on_draw(self, board):
 		# joblib.dump(neuralNetwork, 'red-neuronal-test.pkl')
@@ -69,14 +69,6 @@ class JugadorGrupo13(Player):
 	def on_error(self, board):
 		raise Exception('Hubo un error.')
 
-# def convert_matrix_board_to_nparray(board):
-#     lst = []
-#     for row in board:
-#         for element in row:
-#             lst.append(element)
-#     # print lst
-#     return numpy.array(lst)
-
 def convert_matrix_board_to_nparray(board):
 	lst = []
 	for row in board:
@@ -84,65 +76,3 @@ def convert_matrix_board_to_nparray(board):
 			lst.append(element)
 	# print lst
 	return numpy.array(lst)
-
-def convert_moves_to_list(moves):
-	lst = []
-	for move in moves:
-		lst.append(8 * move.get_row() + move.get_col())
-	return lst
-
-def get_best_move_id(annEvalList, movesList):
-	maxGain = -1
-	maxGainIndex = -1
-	for move in movesList:
-		if (annEvalList[move] > maxGain):
-			maxGain = annEvalList[move]
-			maxGainIndex = movesList.index(move)
-	print "Max gain is " + str(maxGain)
-	return maxGainIndex
-
-def getReward(board, playerColor):
-	if (len(board.get_possible_moves(playerColor)) > 0):
-		# No se termina el juego.
-		reward = 0
-	else:
-		if ((playerColor == SquareType.BLACK) and (len(board.get_possible_moves(SquareType.WHITE)) > 0)):
-			# El player va a tener que "pasar", reward es 0
-			reward = 0
-		elif ((playerColor == SquareType.WHITE) and (len(board.get_possible_moves(SquareType.BLACK)) > 0)):
-			reward = 0
-		else:
-			# Ninguno tiene mas movimientos para hacer.
-			blackAmount = getBlackAmount(board)
-			whiteAmount = getWhiteAmount(board)
-			if (playerColor == SquareType.BLACK):
-				if (blackAmount > whiteAmount):
-					reward = 1
-				elif (blackAmount == whiteAmount):
-					reward = 0
-				else:
-					reward = -1
-			else:
-				if (blackAmount > whiteAmount):
-					reward = -1
-				elif (blackAmount == whiteAmount):
-					reward = 0
-				else:
-					reward = 1
-	return reward
-
-def getBlackAmount(board):
-	count = 0
-	boardAsList = convert_matrix_board_to_nparray(board)
-	for element in boardAsList:
-		if (element == 1):
-			count += 1
-	return count
-
-def getWhiteAmount(board):
-	count = 0
-	boardAsList = convert_matrix_board_to_nparray(board)
-	for element in boardAsList:
-		if (element == 0):
-			count += 1
-	return count
